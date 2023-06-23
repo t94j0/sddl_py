@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "sddl-parser"
+version = "0.1.0"
+description = "Parse SDDL strings"
+authors = ["Max Harley <maxh@maxh.io>"]
+readme = "README.md"
+packages = [{include = "sddl_parser"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+parsy = "^2.1"
+
+[tool.poetry.dev-dependencies]
+pytest="7.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
