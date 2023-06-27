@@ -5,28 +5,12 @@ from typing import List, Dict, Any, Callable
 from functools import partial
 from sddl_parser.dictionary import (
     SDDL_SIDS,
-    SDDL_CMPST_RIGHTS,
     SDDL_FLAGS,
     ACE_TYPE,
     ACE_FLAGS,
     ACE_RIGHTS,
 )
 from sddl_parser.types import ACE, DACL, SDDL, SACL
-
-
-def rights_to_string(rights: int) -> List[str]:
-    rs = []
-    for g in SDDL_CMPST_RIGHTS:  # composite rights first
-        mask = ACE_RIGHTS[g][2]
-        if (rights & mask) == mask:
-            rights -= mask
-            rs.append(ACE_RIGHTS[g][0])
-    while rights > 0:  # then parse with bitmask
-        for r in ACE_RIGHTS.values():
-            if (rights & r[2]) == r[2]:
-                rights -= r[2]
-                rs.append(r[0])
-    return rs
 
 
 def parser_from_list(xs: List[str]) -> Parser:
@@ -63,26 +47,29 @@ def take_till_paren() -> Parser:
 
 
 def parse_sid() -> Parser:
+    return regex(r"S-1(?:-\d+)*")
+
+
+def parse_sid_field() -> Parser:
     well_known_sid = create_parser_from_dict(SDDL_SIDS)
-    specific_sid = regex(r"S-1(?:-\d+)*")
-    return well_known_sid | specific_sid
+    return well_known_sid | parse_sid()
 
 
 def parse_owner() -> Parser:
     owner_identifier = string("O:")
-    return owner_identifier >> parse_sid()
+    return owner_identifier >> parse_sid_field()
 
 
 def parse_group() -> Parser:
     group_identifier = string("G:")
-    return group_identifier >> parse_sid()
+    return group_identifier >> parse_sid_field()
 
 
 sacl_identifier = string("S:")
 dacl_identifier = string("D:")
 sddl_flags = create_parser_from_dict(SDDL_FLAGS).map(lambda x: x.split("|"))
 
-ace_types = create_parser_from_dict(ACE_TYPE, lambda xs, k: xs[k][0])
+ace_types = create_parser_from_dict(ACE_TYPE, lambda xs, k: xs[k])
 
 
 def parse_ace_flags() -> Parser:
@@ -90,20 +77,18 @@ def parse_ace_flags() -> Parser:
         split_by_two = map("".join, zip(*[iter(x)] * 2))
         return list(map(lambda x: ACE_FLAGS[x][0], split_by_two))
 
+    # TODO: Actually parse here instead of just grabbing till ;
     return (take_till_char(";").map(flags_map)) | string("")
-
-    # ace_flags = create_parser_from_dict(ACE_FLAGS, lambda xs, k: xs[k][0]) | string("")
 
 
 def parse_ace_rights() -> Parser:
-    def rights_map(x: str) -> List[str]:
-        split_by_two = map("".join, zip(*[iter(x)] * 2))
-        return list(map(lambda x: ACE_RIGHTS[x][0], split_by_two))
+    hex_ace_rights = regex(r"0x[0-9a-fA-F]+").map(lambda x: int(x, 16))
 
-    hex_ace_rights = (
-        regex(r"0x[0-9a-fA-F]+").map(lambda x: int(x, 16)).map(rights_to_string)
+    well_known_ace_rights = (
+        parser_from_list(list(ACE_RIGHTS.keys()))
+        .many()
+        .map(lambda xs: sum(map(lambda x: ACE_RIGHTS[x], xs)))
     )
-    well_known_ace_rights = take_till_char(";").map(rights_map)
     return hex_ace_rights | well_known_ace_rights
 
 
@@ -146,10 +131,10 @@ def parse_ace_entry() -> Parser:
         seq(
             type=ace_types << char_from(";"),
             flags=parse_ace_flags() << char_from(";"),
-            rights=parse_ace_rights() << char_from(";"),
+            rights_int=parse_ace_rights() << char_from(";"),
             object_guid=object_guid << char_from(";"),
             inherit_object_guid=inherit_object_guid << char_from(";"),
-            sid=parse_sid(),
+            sid=parse_sid_field(),
             conditional_ace=parse_conditional_ace().optional(),
         )
         << string(")")
@@ -167,6 +152,11 @@ sacl = seq(
 
 # https://learn.microsoft.com/en-us/windows/win32/secauthz/sid-strings?source=recommendations
 # Example: O:SYG:SYD:(A;ID;FA;;;SY)
+# TODO: Allow entries to be out of order.
+# Something like sddl_item = parse_owner() | parse_group() | dacl | sacl
+# Then sddl_entry = sddl_item.many(), then just map each type to a single object
+# Not sure how you ensure only one of each type. Maybe just post-processing,
+# but I feel like that could be done in the parser
 sddl_item = seq(
     owner=parse_owner(), group=parse_group(), dacl=dacl.optional(), sacl=sacl.optional()
 ).combine_dict(SDDL)

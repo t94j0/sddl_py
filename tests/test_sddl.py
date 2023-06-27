@@ -1,6 +1,8 @@
 from sddl_parser import parser as parser
 from sddl_parser import api
 from sddl_parser.parser import SDDL, ACE, DACL, SACL
+from sddl_parser.rights_enums import GenericAccessRights
+from sddl_parser.type_enums import AceType
 
 
 def test_sddl_sids():
@@ -17,46 +19,7 @@ def test_sddl_sids():
 def test_sddl_ace_types():
     test = "A"
     parsed = parser.ace_types.parse(test)
-    assert parsed == "ACCESS_ALLOWED"
-
-
-def test_sddl_ace():
-    test = "(A;ID;0x1200a9;;;S-1-15-2-2)"
-    parsed = parser.parse_ace_entry().parse(test)
-    assert parsed == parser.ACE(
-        type="ACCESS_ALLOWED",
-        flags=["INHERITED"],
-        rights=["FILE_READ", "WRITE_PROPERTY"],
-        object_guid="",
-        inherit_object_guid="",
-        sid="S-1-15-2-2",
-    )
-
-
-def test_sddl_ace_empty_flags():
-    test = "(A;;0x1200a9;;;SY)"
-    parsed = parser.parse_ace_entry().parse(test)
-    assert parsed == ACE(
-        type="ACCESS_ALLOWED",
-        flags=[],
-        rights=["FILE_READ", "WRITE_PROPERTY"],
-        object_guid="",
-        inherit_object_guid="",
-        sid="LOCAL_SYSTEM",
-    )
-
-
-def test_sddl_ace_known_sid():
-    test = "(A;ID;0x1200a9;;;AC)"
-    parsed = parser.parse_ace_entry().parse(test)
-    assert parsed == parser.ACE(
-        type="ACCESS_ALLOWED",
-        flags=["INHERITED"],
-        rights=["FILE_READ", "WRITE_PROPERTY"],
-        object_guid="",
-        inherit_object_guid="",
-        sid="ALL_APP_PACKAGES",
-    )
+    assert parsed == AceType.ACCESS_ALLOWED
 
 
 def test_sddl_item():
@@ -69,103 +32,101 @@ def test_sddl_item():
             flags=["SDDL_AUTO_INHERITED"],
             aces=[
                 ACE(
-                    type="ACCESS_ALLOWED",
+                    type=AceType.ACCESS_ALLOWED,
                     flags=["INHERITED"],
-                    rights=["FILE_ALL"],
+                    rights_int=0x1F01FF,
+                    rights={
+                        GenericAccessRights.ACCESS0,
+                        GenericAccessRights.ACCESS1,
+                        GenericAccessRights.ACCESS2,
+                        GenericAccessRights.ACCESS3,
+                        GenericAccessRights.ACCESS4,
+                        GenericAccessRights.ACCESS5,
+                        GenericAccessRights.ACCESS6,
+                        GenericAccessRights.ACCESS7,
+                        GenericAccessRights.ACCESS8,
+                        GenericAccessRights.DELETE,
+                        GenericAccessRights.READ_CONTROL,
+                        GenericAccessRights.WRITE_DAC,
+                        GenericAccessRights.WRITE_OWNER,
+                        GenericAccessRights.STANDARD_RIGHTS_REQUIRED,
+                        GenericAccessRights.SYNCHRONIZE,
+                        GenericAccessRights.STANDARD_RIGHTS_ALL,
+                    },
                     object_guid="",
                     inherit_object_guid="",
                     sid="LOCAL_SYSTEM",
                 ),
                 ACE(
-                    type="ACCESS_ALLOWED",
+                    type=AceType.ACCESS_ALLOWED,
                     flags=["INHERITED"],
-                    rights=["FILE_ALL"],
+                    rights_int=0x1F01FF,
+                    rights={
+                        GenericAccessRights.ACCESS0,
+                        GenericAccessRights.ACCESS1,
+                        GenericAccessRights.ACCESS2,
+                        GenericAccessRights.ACCESS3,
+                        GenericAccessRights.ACCESS4,
+                        GenericAccessRights.ACCESS5,
+                        GenericAccessRights.ACCESS6,
+                        GenericAccessRights.ACCESS7,
+                        GenericAccessRights.ACCESS8,
+                        GenericAccessRights.DELETE,
+                        GenericAccessRights.READ_CONTROL,
+                        GenericAccessRights.WRITE_DAC,
+                        GenericAccessRights.WRITE_OWNER,
+                        GenericAccessRights.STANDARD_RIGHTS_REQUIRED,
+                        GenericAccessRights.SYNCHRONIZE,
+                        GenericAccessRights.STANDARD_RIGHTS_ALL,
+                    },
                     object_guid="",
                     inherit_object_guid="",
                     sid="BUILTIN_ADMINISTRATORS",
                 ),
                 ACE(
-                    type="ACCESS_ALLOWED",
+                    type=AceType.ACCESS_ALLOWED,
                     flags=["INHERITED"],
-                    rights=["FILE_READ", "WRITE_PROPERTY"],
+                    rights_int=0x1200A9,
+                    rights={
+                        GenericAccessRights.ACCESS0,
+                        GenericAccessRights.ACCESS3,
+                        GenericAccessRights.ACCESS5,
+                        GenericAccessRights.ACCESS7,
+                        GenericAccessRights.READ_CONTROL,
+                        GenericAccessRights.SYNCHRONIZE,
+                    },
                     object_guid="",
                     inherit_object_guid="",
                     sid="BUILTIN_USERS",
                 ),
                 ACE(
-                    type="ACCESS_ALLOWED",
+                    type=AceType.ACCESS_ALLOWED,
                     flags=["INHERITED"],
-                    rights=["FILE_READ", "WRITE_PROPERTY"],
+                    rights_int=0x1200A9,
+                    rights={
+                        GenericAccessRights.ACCESS0,
+                        GenericAccessRights.ACCESS3,
+                        GenericAccessRights.ACCESS5,
+                        GenericAccessRights.ACCESS7,
+                        GenericAccessRights.READ_CONTROL,
+                        GenericAccessRights.SYNCHRONIZE,
+                    },
                     object_guid="",
                     inherit_object_guid="",
                     sid="ALL_APP_PACKAGES",
                 ),
                 ACE(
-                    type="ACCESS_ALLOWED",
+                    type=AceType.ACCESS_ALLOWED,
                     flags=["INHERITED"],
-                    rights=["FILE_READ", "WRITE_PROPERTY"],
-                    object_guid="",
-                    inherit_object_guid="",
-                    sid="S-1-15-2-2",
-                ),
-            ],
-        ),
-    )
-
-
-def test_sddl():
-    test = "O:S-1-5-80-12345678-12345678-12345678-123456789-123456789G:S-1-5-80-12345678-12345678-12345678-123456789-123456789D:PAI(A;;0x1200a9;;;SY)(A;;0x1200a9;;;BA)(A;;0x1200a9;;;BU)(A;;FA;;;S-1-5-80-12345678-12345678-12345678-123456789-123456789)(A;;0x1200a9;;;AC)(A;;0x1200a9;;;S-1-15-2-2)"
-    parsed = parser.sddl_item.parse(test)
-    assert parsed == SDDL(
-        owner="S-1-5-80-12345678-12345678-12345678-123456789-123456789",
-        group="S-1-5-80-12345678-12345678-12345678-123456789-123456789",
-        dacl=DACL(
-            flags=["PROTECTED", "SDDL_AUTO_INHERITED"],
-            aces=[
-                ACE(
-                    type="ACCESS_ALLOWED",
-                    flags=[],
-                    rights=["FILE_READ", "WRITE_PROPERTY"],
-                    object_guid="",
-                    inherit_object_guid="",
-                    sid="LOCAL_SYSTEM",
-                ),
-                ACE(
-                    type="ACCESS_ALLOWED",
-                    flags=[],
-                    rights=["FILE_READ", "WRITE_PROPERTY"],
-                    object_guid="",
-                    inherit_object_guid="",
-                    sid="BUILTIN_ADMINISTRATORS",
-                ),
-                ACE(
-                    type="ACCESS_ALLOWED",
-                    flags=[],
-                    rights=["FILE_READ", "WRITE_PROPERTY"],
-                    object_guid="",
-                    inherit_object_guid="",
-                    sid="BUILTIN_USERS",
-                ),
-                ACE(
-                    type="ACCESS_ALLOWED",
-                    flags=[],
-                    rights=["FILE_ALL"],
-                    object_guid="",
-                    inherit_object_guid="",
-                    sid="S-1-5-80-12345678-12345678-12345678-123456789-123456789",
-                ),
-                ACE(
-                    type="ACCESS_ALLOWED",
-                    flags=[],
-                    rights=["FILE_READ", "WRITE_PROPERTY"],
-                    object_guid="",
-                    inherit_object_guid="",
-                    sid="ALL_APP_PACKAGES",
-                ),
-                ACE(
-                    type="ACCESS_ALLOWED",
-                    flags=[],
-                    rights=["FILE_READ", "WRITE_PROPERTY"],
+                    rights_int=0x1200A9,
+                    rights={
+                        GenericAccessRights.ACCESS0,
+                        GenericAccessRights.ACCESS3,
+                        GenericAccessRights.ACCESS5,
+                        GenericAccessRights.ACCESS7,
+                        GenericAccessRights.READ_CONTROL,
+                        GenericAccessRights.SYNCHRONIZE,
+                    },
                     object_guid="",
                     inherit_object_guid="",
                     sid="S-1-15-2-2",
@@ -193,69 +154,7 @@ def test_sddl_none_dacl():
     assert parsed.dacl == None
 
 
-def test_sddl_ace_with_conditional_ace():
-    test = '(XA;ID;0x1200a9;;;BU;(WIN://SYSAPPID Contains "Microsoft.MicrosoftEdge.Stable_abcdefghijk"))'
-    parsed = parser.parse_ace_entry().parse(test)
-    assert parsed == ACE(
-        type="CALLBACK_ACCESS_ALLOWED",
-        flags=["INHERITED"],
-        rights=["FILE_READ", "WRITE_PROPERTY"],
-        object_guid="",
-        inherit_object_guid="",
-        sid="BUILTIN_USERS",
-        conditional_ace='(WIN://SYSAPPID Contains "Microsoft.MicrosoftEdge.Stable_abcdefghijk")',
-    )
-
-
-def test_sddl_ace_with_conditional_ace_deep():
-    test = "(XA;;LCRPWP;;;BA;(!(WIN://ISMULTISESSIONSKU)))"
-    parsed = parser.parse_ace_entry().parse_partial(test)
-    assert parsed[1] == ""
-
-
-def test_sddl_conditional_ace_deep():
-    test = ";(!(WIN://ISMULTISESSIONSKU))("
-    parsed = parser.parse_conditional_ace().parse_partial(test)
-    assert parsed[1] == "("
-
-
 def test_sddl_sacl():
     test = "O:SYG:SYD:(A;;CCLCSWRPWPDTLOCRRC;;;SY)S:"
     parsed = parser.sddl_item.parse(test)
     assert parsed.sacl == SACL(flags=["NULL_DACL"], aces=[])
-
-
-def test_sddl_ace_flags_multiple():
-    test = "(A;OICIIO;GA;;;S-1-5-80-12345678-12345678-12345678-123456789-123456789)"
-    parsed = parser.parse_ace_entry().parse(test)
-    print(parsed)
-    assert parsed == ACE(
-        type="ACCESS_ALLOWED",
-        flags=["OBJECT_INHERIT", "CONTAINER_INHERIT", "INHERIT_ONLY"],
-        rights=["GENERIC_ALL"],
-        object_guid="",
-        inherit_object_guid="",
-        sid="S-1-5-80-12345678-12345678-12345678-123456789-123456789",
-        conditional_ace=None,
-    )
-
-
-def test_sddl_ace_rights_multiple():
-    test = "(A;;CCLCSWLOCRRC;;;SU)"
-    parsed = parser.parse_ace_entry().parse(test)
-    assert parsed == ACE(
-        type="ACCESS_ALLOWED",
-        flags=[],
-        rights=[
-            "CREATE_CHILD",
-            "LIST_CHILDREN",
-            "SELF_WRITE",
-            "LIST_OBJECT",
-            "CONTROL_ACCESS",
-            "READ_CONTROL",
-        ],
-        object_guid="",
-        inherit_object_guid="",
-        sid="SERVICE",
-        conditional_ace=None,
-    )

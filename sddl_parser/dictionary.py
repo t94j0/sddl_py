@@ -1,135 +1,30 @@
-# https://github.com/An0ther0ne/SSDL_Utils/blob/master/readsddl.py
-
-C_DELETE = 0x00010000
-C_READ_CONTROL = 0x00020000
-C_WRITE_DAC = 0x00040000
-C_WRITE_OWNER = 0x00080000
-C_SYNCHRONIZE = 0x00100000
-C_STANDARD_RIGHTS_REQUIRED = 0x000F0000
-
-C_STANDARD_RIGHTS_READ = C_READ_CONTROL
-C_STANDARD_RIGHTS_WRITE = C_READ_CONTROL
-C_STANDARD_RIGHTS_EXECUTE = C_READ_CONTROL
-
-C_FILE_READ_DATA = 0x0001
-C_FILE_LIST_DIRECTORY = 0x0001
-C_FILE_WRITE_DATA = 0x0002
-C_FILE_ADD_FILE = 0x0002
-C_FILE_APPEND_DATA = 0x0004
-C_FILE_ADD_SUBDIRECTORY = 0x0004
-C_FILE_CREATE_PIPE_INSTANCE = 0x0004
-
-C_FILE_READ_EA = 0x0008
-C_FILE_WRITE_EA = 0x0010
-C_FILE_EXECUTE = 0x0020
-C_FILE_TRAVERSE = 0x0020
-C_FILE_DELETE_CHILD = 0x0040
-C_FILE_READ_ATTRIBUTES = 0x0080
-C_FILE_WRITE_ATTRIBUTES = 0x0100
-
-C_FILE_ALL_ACCESS = C_STANDARD_RIGHTS_REQUIRED | C_SYNCHRONIZE | 0x1FF
-
-C_FILE_GENERIC_READ = (
-    C_STANDARD_RIGHTS_READ
-    | C_FILE_READ_DATA
-    | C_FILE_READ_ATTRIBUTES
-    | C_FILE_READ_EA
-    | C_SYNCHRONIZE
+from typing import Dict
+from sddl_parser.rights_enums import (
+    GenericAccessRights,
+    FileAccessRights,
+    RegistryKeyAccessRights,
 )
-
-C_FILE_GENERIC_WRITE = (
-    C_STANDARD_RIGHTS_WRITE
-    | C_FILE_WRITE_DATA
-    | C_FILE_WRITE_ATTRIBUTES
-    | C_FILE_WRITE_EA
-    | C_FILE_APPEND_DATA
-    | C_SYNCHRONIZE
-)
-
-C_FILE_GENERIC_EXECUTE = (
-    C_STANDARD_RIGHTS_EXECUTE | C_FILE_READ_ATTRIBUTES | C_FILE_EXECUTE | C_SYNCHRONIZE
-)
-
-C_KEY_QUERY_VALUE = 0x0001
-C_KEY_SET_VALUE = 0x0002
-C_KEY_CREATE_SUB_KEY = 0x0004
-C_KEY_ENUMERATE_SUB_KEYS = 0x0008
-C_KEY_NOTIFY = 0x0010
-C_KEY_CREATE_LINK = 0x0020
-
-C_STANDARD_RIGHTS_REQUIRED = C_DELETE | C_READ_CONTROL | C_WRITE_DAC | C_WRITE_OWNER
-
-C_KEY_ALL_ACCESS = (  # 0xF003F
-    C_STANDARD_RIGHTS_REQUIRED
-    | C_KEY_QUERY_VALUE
-    | C_KEY_SET_VALUE
-    | C_KEY_CREATE_SUB_KEY
-    | C_KEY_ENUMERATE_SUB_KEYS
-    | C_KEY_NOTIFY
-    | C_KEY_CREATE_LINK
-)
-
-C_KEY_WRITE = (  # 0x20006
-    C_STANDARD_RIGHTS_WRITE | C_KEY_SET_VALUE | C_KEY_CREATE_SUB_KEY
-)
-
-# C_FILE_ALL_ACCESS      	 = 0x001F01FF
-# C_FILE_GENERIC_WRITE   	 = 0x00120116
-# C_FILE_GENERIC_READ    	 = 0x00120089
-# C_FILE_GENERIC_EXECUTE 	 = 0x001200A0
-# C_STANDARD_RIGHTS_REQUIRED = 0x000F0000
-# C_KEY_ALL_ACCESS           = 0x000F003F
-# C_KEY_WRITE           	 = 0x00020006
+from sddl_parser.type_enums import AceType
 
 # https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/628ebb1d-c509-4ea0-a10f-77ef97ca4586
-ACE_TYPE = {
-    "A": ("ACCESS_ALLOWED", "ACCESS_ALLOWED_ACE_TYPE", 0x00),
-    "D": ("ACCESS_DENIED", "ACCESS_DENIED_ACE_TYPE", 0x01),
-    "AU": ("AUDIT", "SYSTEM_AUDIT_ACE_TYPE", 0x02),
-    "AL": ("ALARM", "SYSTEM_ALARM_ACE_TYPE", 0x03),
-    "OA": (
-        "OBJECT_ACCESS_ALLOWED",
-        "ACCESS_ALLOWED_OBJECT_ACE_TYPE",
-        0x05,
-    ),
-    "OD": (
-        "OBJECT_ACCESS_DENIED",
-        "ACCESS_DENIED_OBJECT_ACE_TYPE",
-        0x06,
-    ),
-    "OU": ("OBJECT_AUDIT", "SYSTEM_AUDIT_OBJECT_ACE_TYPE", 0x07),
-    "OL": ("OBJECT_ALARM", "SYSTEM_ALARM_OBJECT_ACE_TYPE", 0x08),
-    "XA": (
-        "CALLBACK_ACCESS_ALLOWED",
-        "ACCESS_ALLOWED_CALLBACK_ACE_TYPE",
-        0x09,
-    ),
-    "XD": (
-        "CALLBACK_ACCESS_DENIED",
-        "ACCESS_DENIED_CALLBACK_ACE_TYPE",
-        0x0A,
-    ),
-    "ZA": (
-        "ACCESS_ALLOWED_CALLBACK_OBJECT",
-        "SDDL_CALLBACK_OBJECT_ACCESS_ALLOWED",
-        0x0B,
-    ),
-    "XU": ("CALLBACK_AUDIT", "SDDL_CALLBACK_AUDIT", 0x0D),
-    "ML": (
-        "MANDATORY_LABEL",
-        "SYSTEM_MANDATORY_LABEL_ACE_TYPE",
-        0x11,
-    ),
-    "RA": (
-        "RESOURCE_ACCESS_ALLOWED",
-        "SYSTEM_RESOURCE_ATTRIBUTE_ACE_TYPE",
-        0x12,
-    ),
-    "SP": (
-        "SCOPED_POLICY_ID",
-        "SDDL_SCOPED_POLICY_ID",
-        0x13,
-    ),
+ACE_TYPE: Dict[str, AceType] = {
+    "A": AceType.ACCESS_ALLOWED,
+    "D": AceType.ACCESS_DENIED,
+    "OA": AceType.ACCESS_ALLOWED_OBJECT,
+    "OD": AceType.ACCESS_DENIED_OBJECT,
+    "AU": AceType.SYSTEM_AUDIT,
+    "AL": AceType.SYSTEM_ALARM,
+    "OU": AceType.SYSTEM_AUDIT_OBJECT,
+    "OL": AceType.SYSTEM_ALARM_OBJECT,
+    "ML": AceType.SYSTEM_MANDATORY_LABEL,
+    "XA": AceType.ACCESS_ALLOWED_CALLBACK,
+    "XD": AceType.ACCESS_DENIED_CALLBACK,
+    "RA": AceType.SYSTEM_RESOURCE_ATTRIBUTE,
+    "SP": AceType.SYSTEM_SCOPED_POLICY_ID,
+    "XU": AceType.SYSTEM_AUDIT_CALLBACK,
+    "ZA": AceType.ACCESS_ALLOWED_CALLBACK_OBJECT,
+    "TL": AceType.SYSTEM_PROCESS_TRUST_LABEL,
+    "FL": AceType.SYSTEM_ACCESS_FILTER,
 }
 
 ACE_FLAGS = {
@@ -143,61 +38,41 @@ ACE_FLAGS = {
     # TODO: TP and CR missing - https://learn.microsoft.com/en-us/windows/win32/secauthz/ace-strings
 }
 
-ACE_RIGHTS = {
-    # -- Directory service object access rights:
-    "CC": ("CREATE_CHILD", "ADS_RIGHT_DS_CREATE_CHILD", 0x00000001),
-    "DC": ("DELETE_CHILD", "ADS_RIGHT_DS_DELETE_CHILD", 0x00000002),
-    "LC": ("LIST_CHILDREN", "ADS_RIGHT_ACTRL_DS_LIST", 0x00000004),
-    "SW": ("SELF_WRITE", "ADS_RIGHT_DS_SELF", 0x00000008),
-    "RP": ("READ_PROPERTY", "ADS_RIGHT_DS_READ_PROP", 0x00000010),
-    "WP": (
-        "WRITE_PROPERTY",
-        "ADS_RIGHT_DS_WRITE_PROP",
-        0x00000020,
-    ),  # Read and execute?
-    "DT": ("DELETE_TREE", "ADS_RIGHT_DS_DELETE_TREE", 0x00000040),
-    "LO": ("LIST_OBJECT", "ADS_RIGHT_DS_LIST_OBJECT", 0x00000080),
-    "CR": ("CONTROL_ACCESS", "ADS_RIGHT_DS_CONTROL_ACCESS", 0x00000100),
-    # -- Standard access rights:
-    "SD": ("STANDARD_DELETE", "ADS_RIGHT_DELETE", 0x00010000),
-    "RC": ("READ_CONTROL", "ADS_RIGHT_READ_CONTROL", 0x00020000),
-    "WD": ("WRITE_DAC", "ADS_RIGHT_WRITE_DAC", 0x00040000),
-    "WO": ("WRITE_OWNER", "ADS_RIGHT_WRITE_OWNER", 0x00080000),
-    # -- Generic access rights
-    "GA": ("GENERIC_ALL", "ADS_RIGHT_GENERIC_ALL", 0x10000000),
-    "GX": ("GENERIC_EXECUTE", "ADS_RIGHT_GENERIC_EXECUTE", 0x20000000),
-    "GW": ("GENERIC_WRITE", "ADS_RIGHT_GENERIC_WRITE", 0x40000000),
-    "GR": ("GENERIC_READ", "ADS_RIGHT_GENERIC_READ", 0x80000000),
-    # -- File access rights:
-    "FA": (
-        "FILE_ALL",
-        "FILE_ALL_ACCESS",
-        0x001F01FF,
-    ),  # (STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0x1FF)
-    "FR": ("FILE_READ", "FILE_GENERIC_READ", C_FILE_GENERIC_READ),  # 0x00120089
-    "FW": ("FILE_WRITE", "FILE_GENERIC_WRITE", C_FILE_GENERIC_WRITE),  # 0x00120116
-    "FX": (
-        "FILE_EXECUTE",
-        "FILE_GENERIC_EXECUTE",
-        C_FILE_GENERIC_EXECUTE,
-    ),  # 0x001200A0
-    # -- Registry key access rights:
-    "KA": ("KEY_ALL", "KEY_ALL_ACCESS", 0xF003F),
-    "KR": ("KEY_READ", "KEY_READ", 0x20019),
-    "KW": (
-        "KEY_WRITE",
-        "KEY_WRITE",
-        0x20006,
-    ),  # Combines the STANDARD_RIGHTS_WRITE, KEY_SET_VALUE, and KEY_CREATE_SUB_KEY access rights.
-    "KX": ("KEY_EXECUTE", "KEY_EXECUTE", 0x20019),  # Equivalent to KEY_READ.
-    # -- Mandatory label rights:
-    "NW": ("NO_WRITE_UP", "SYSTEM_MANDATORY_LABEL_NO_READ_UP", 0x02),
-    "NR": ("NO_READ_UP", "SYSTEM_MANDATORY_LABEL_NO_WRITE_UP", 0x01),
-    "NX": ("NO_EXECUTE_UP", "SYSTEM_MANDATORY_LABEL_NO_EXECUTE_UP", 0x04),
+
+# https://github.com/tpn/winsdk-10/blob/master/Include/10.0.14393.0/shared/sddl.h#L123
+ACE_RIGHTS: Dict[str, int] = {
+    "CC": GenericAccessRights.ACCESS0,
+    "DC": GenericAccessRights.ACCESS1,
+    "LC": GenericAccessRights.ACCESS2,
+    "SW": GenericAccessRights.ACCESS3,
+    "RP": GenericAccessRights.ACCESS4,
+    "WP": GenericAccessRights.ACCESS5,
+    "DT": GenericAccessRights.ACCESS6,
+    "LO": GenericAccessRights.ACCESS7,
+    "CR": GenericAccessRights.ACCESS8,
+    "SD": GenericAccessRights.DELETE,
+    "RC": GenericAccessRights.READ_CONTROL,
+    "WD": GenericAccessRights.WRITE_DAC,
+    "WO": GenericAccessRights.WRITE_OWNER,
+    "GA": GenericAccessRights.GENERIC_ALL,
+    "GX": GenericAccessRights.GENERIC_EXECUTE,
+    "GW": GenericAccessRights.GENERIC_WRITE,
+    "GR": GenericAccessRights.GENERIC_READ,
+    "FA": FileAccessRights.FILE_ALL_ACCESS,
+    "FR": FileAccessRights.FILE_GENERIC_READ,
+    "FW": FileAccessRights.FILE_GENERIC_WRITE,
+    "FX": FileAccessRights.FILE_GENERIC_EXECUTE,
+    "KA": RegistryKeyAccessRights.KEY_ALL_ACCESS,
+    "KR": RegistryKeyAccessRights.KEY_READ,
+    "KW": RegistryKeyAccessRights.KEY_WRITE,
+    "KX": RegistryKeyAccessRights.KEY_EXECUTE,
+    # SDDL_NO_READ_UP
+    "NR": 0x01,
+    # SDDL_NO_WRITE_UP
+    "NW": 0x02,
+    # SDDL_NO_EXECUTE_UP
+    "NX": 0x04,
 }
-
-SDDL_CMPST_RIGHTS = ["FA", "FR", "FW", "FX", "KA", "KR", "KW", "KX"]
-
 
 SDDL_SIDS = {  # Well known SIDs
     "AA": "ACCESS_CONTROL_ASSISTANCE_OPS",
