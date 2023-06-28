@@ -135,13 +135,6 @@ WindowStationAccessRights
 WnfAccessRights
 ```
 
-# TODO
-1. Allow identifiers (D:, O:, S:) to be out of order. I haven't run into this on any SDDLs on my system, but I'm sure it exists somewhere out there
-
-# Thanks
-- Thanks to [An0ther0ne] for compiling the constants for ACEs
-- Thanks to [James Forshaw] for compiling access rights in NTApiDotNet
-
-
+# Shoulders of Giants
 [An0ther0ne]: https://github.com/An0ther0ne
 [James Forshaw]: https://twitter.com/tiraniddo
