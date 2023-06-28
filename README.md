@@ -136,5 +136,8 @@ WnfAccessRights
 ```
 
 # Shoulders of Giants
+- [An0ther0ne]
+- [James Forshaw]
+
 [An0ther0ne]: https://github.com/An0ther0ne
 [James Forshaw]: https://twitter.com/tiraniddo
