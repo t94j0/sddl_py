@@ -1,4 +1,23 @@
-from enum import IntEnum
+from enum import IntEnum, Enum, auto
+
+
+class SDDLFlags(Enum):
+    SDDL_AUTO_INHERIT_REQ = auto()
+    SDDL_AUTO_INHERITED = auto()
+    PROTECTED = auto()
+    NO_ACCESS_CONTROL = auto()
+
+
+class AceFlags(IntEnum):
+    OBJECT_INHERIT = 0x01
+    CONTAINER_INHERIT = 0x02
+    NO_PROPAGATE = 0x04
+    INHERIT_ONLY = 0x08
+    INHERITED = 0x10
+    AUDIT_SUCCESS = 0x40
+    TRUST_PROTECTED_FILTER = 0x40
+    AUDIT_FAILURE = 0x80
+    # CRITICAL_ACE_FLAG - Can't find this value
 
 
 class AceType(IntEnum):

@@ -1,22 +1,23 @@
 from sddl_parser import parser as parser
 from sddl_parser import api
-from sddl_parser.parser import SDDL, ACE, DACL, SACL
-from sddl_parser.rights_enums import ServiceAccessRights
-from sddl_parser.type_enums import AceType
+from sddl_parser.parser import SDDL, ACE, ACL
+from sddl_parser.ace_rights_enums import ServiceAccessRights
+from sddl_parser.enums import AceType, SDDLFlags
+from sddl_parser.sid_enum import SIDEnum
 
 
 def test_translate_service_access():
     test = "O:SYG:SYD:(A;;CCLCSWRPWPDTLOCRRC;;;SY)S:"
     parsed = api.parse_sddl(test, ServiceAccessRights)
     assert parsed == SDDL(
-        owner="LOCAL_SYSTEM",
-        group="LOCAL_SYSTEM",
-        dacl=DACL(
-            flags=["NULL_DACL"],
+        owner=SIDEnum.LOCAL_SYSTEM,
+        group=SIDEnum.LOCAL_SYSTEM,
+        dacl=ACL(
+            flags={SDDLFlags.NO_ACCESS_CONTROL},
             aces=[
                 ACE(
                     type=AceType.ACCESS_ALLOWED,
-                    flags=[],
+                    flags=set(),
                     rights_int=0x201FD,
                     rights={
                         ServiceAccessRights.SERVICE_QUERY_CONFIG,
@@ -31,9 +32,9 @@ def test_translate_service_access():
                     },
                     object_guid="",
                     inherit_object_guid="",
-                    sid="LOCAL_SYSTEM",
+                    sid=SIDEnum.LOCAL_SYSTEM,
                 ),
             ],
         ),
-        sacl=SACL(flags=["NULL_DACL"], aces=[]),
+        sacl=ACL(flags={SDDLFlags.NO_ACCESS_CONTROL}, aces=[]),
     )

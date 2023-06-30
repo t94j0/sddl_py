@@ -3,14 +3,15 @@ from functools import reduce
 from operator import or_
 from typing import List, Dict, Any, Callable
 from functools import partial
-from sddl_parser.dictionary import (
+from sddl_parser.well_known_dictionary import (
     SDDL_SIDS,
     SDDL_FLAGS,
     ACE_TYPE,
     ACE_FLAGS,
     ACE_RIGHTS,
 )
-from sddl_parser.types import ACE, DACL, SDDL, SACL
+from sddl_parser.types import ACE, SDDL, ACL
+from sddl_parser.enums import SDDLFlags
 
 
 def parser_from_list(xs: List[str]) -> Parser:
@@ -67,18 +68,26 @@ def parse_group() -> Parser:
 
 sacl_identifier = string("S:")
 dacl_identifier = string("D:")
-sddl_flags = create_parser_from_dict(SDDL_FLAGS).map(lambda x: x.split("|"))
+
+
+def parse_sddl_flags() -> Parser:
+    def map_flags(xs: List[str]):
+        if xs == []:
+            return {SDDLFlags.NO_ACCESS_CONTROL}
+        return {SDDL_FLAGS[x] for x in xs}
+
+    return parser_from_list(list(SDDL_FLAGS)).many().map(map_flags)
+
 
 ace_types = create_parser_from_dict(ACE_TYPE, lambda xs, k: xs[k])
 
 
 def parse_ace_flags() -> Parser:
-    def flags_map(x: str) -> List[str]:
-        split_by_two = map("".join, zip(*[iter(x)] * 2))
-        return list(map(lambda x: ACE_FLAGS[x][0], split_by_two))
-
-    # TODO: Actually parse here instead of just grabbing till ;
-    return (take_till_char(";").map(flags_map)) | string("")
+    return (
+        parser_from_list(list(ACE_FLAGS.keys()))
+        .many()
+        .map(lambda xs: set(map(lambda x: ACE_FLAGS[x], xs)))
+    )
 
 
 def parse_ace_rights() -> Parser:
@@ -142,12 +151,12 @@ def parse_ace_entry() -> Parser:
 
 
 dacl = seq(
-    flags=dacl_identifier >> sddl_flags, aces=parse_ace_entry().many()
-).combine_dict(DACL)
+    flags=dacl_identifier >> parse_sddl_flags(), aces=parse_ace_entry().many()
+).combine_dict(ACL)
 
 sacl = seq(
-    flags=sacl_identifier >> sddl_flags, aces=parse_ace_entry().many()
-).combine_dict(SACL)
+    flags=sacl_identifier >> parse_sddl_flags(), aces=parse_ace_entry().many()
+).combine_dict(ACL)
 
 
 # https://learn.microsoft.com/en-us/windows/win32/secauthz/sid-strings?source=recommendations

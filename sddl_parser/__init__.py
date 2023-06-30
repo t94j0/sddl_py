@@ -1,3 +1,3 @@
 from .types import *
 from .api import *
-from .rights_enums import *
+from .ace_rights_enums import *

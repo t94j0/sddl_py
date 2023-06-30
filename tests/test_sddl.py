@@ -1,8 +1,9 @@
 from sddl_parser import parser as parser
 from sddl_parser import api
-from sddl_parser.parser import SDDL, ACE, DACL, SACL
-from sddl_parser.rights_enums import GenericAccessRights
-from sddl_parser.type_enums import AceType
+from sddl_parser.parser import SDDL, ACE, ACL
+from sddl_parser.ace_rights_enums import GenericAccessRights
+from sddl_parser.enums import AceFlags, AceType, SDDLFlags
+from sddl_parser.sid_enum import SIDEnum
 
 
 def test_sddl_sids():
@@ -26,14 +27,14 @@ def test_sddl_item():
     test = "O:SYG:SYD:AI(A;ID;FA;;;SY)(A;ID;FA;;;BA)(A;ID;0x1200a9;;;BU)(A;ID;0x1200a9;;;AC)(A;ID;0x1200a9;;;S-1-15-2-2)"
     parsed = api.parse_sddl(test)
     assert parsed == SDDL(
-        owner="LOCAL_SYSTEM",
-        group="LOCAL_SYSTEM",
-        dacl=DACL(
-            flags=["SDDL_AUTO_INHERITED"],
+        owner=SIDEnum.LOCAL_SYSTEM,
+        group=SIDEnum.LOCAL_SYSTEM,
+        dacl=ACL(
+            flags={SDDLFlags.SDDL_AUTO_INHERITED},
             aces=[
                 ACE(
                     type=AceType.ACCESS_ALLOWED,
-                    flags=["INHERITED"],
+                    flags={AceFlags.INHERITED},
                     rights_int=0x1F01FF,
                     rights={
                         GenericAccessRights.ACCESS0,
@@ -55,11 +56,11 @@ def test_sddl_item():
                     },
                     object_guid="",
                     inherit_object_guid="",
-                    sid="LOCAL_SYSTEM",
+                    sid=SIDEnum.LOCAL_SYSTEM,
                 ),
                 ACE(
                     type=AceType.ACCESS_ALLOWED,
-                    flags=["INHERITED"],
+                    flags={AceFlags.INHERITED},
                     rights_int=0x1F01FF,
                     rights={
                         GenericAccessRights.ACCESS0,
@@ -81,11 +82,11 @@ def test_sddl_item():
                     },
                     object_guid="",
                     inherit_object_guid="",
-                    sid="BUILTIN_ADMINISTRATORS",
+                    sid=SIDEnum.BUILTIN_ADMINISTRATORS,
                 ),
                 ACE(
                     type=AceType.ACCESS_ALLOWED,
-                    flags=["INHERITED"],
+                    flags={AceFlags.INHERITED},
                     rights_int=0x1200A9,
                     rights={
                         GenericAccessRights.ACCESS0,
@@ -97,11 +98,11 @@ def test_sddl_item():
                     },
                     object_guid="",
                     inherit_object_guid="",
-                    sid="BUILTIN_USERS",
+                    sid=SIDEnum.BUILTIN_USERS,
                 ),
                 ACE(
                     type=AceType.ACCESS_ALLOWED,
-                    flags=["INHERITED"],
+                    flags={AceFlags.INHERITED},
                     rights_int=0x1200A9,
                     rights={
                         GenericAccessRights.ACCESS0,
@@ -113,11 +114,11 @@ def test_sddl_item():
                     },
                     object_guid="",
                     inherit_object_guid="",
-                    sid="ALL_APP_PACKAGES",
+                    sid=SIDEnum.ALL_APP_PACKAGES,
                 ),
                 ACE(
                     type=AceType.ACCESS_ALLOWED,
-                    flags=["INHERITED"],
+                    flags={AceFlags.INHERITED},
                     rights_int=0x1200A9,
                     rights={
                         GenericAccessRights.ACCESS0,
@@ -139,13 +140,13 @@ def test_sddl_item():
 def test_sddl_null_dacl_flags():
     test = "O:SYG:SYD:(A;ID;FA;;;SY)(A;ID;FA;;;BA)(A;ID;0x1200a9;;;BU)(A;ID;0x1200a9;;;AC)(A;ID;0x1200a9;;;S-1-15-2-2)"
     parsed = parser.sddl_item.parse(test)
-    assert parsed.dacl.flags == ["NULL_DACL"]
+    assert parsed.dacl.flags == {SDDLFlags.NO_ACCESS_CONTROL}
 
 
 def test_sddl_null_dacl_empty_aces():
     test = "O:SYG:SYD:"
     parsed = parser.sddl_item.parse(test)
-    assert parsed.dacl == DACL(flags=["NULL_DACL"], aces=[])
+    assert parsed.dacl == ACL(flags={SDDLFlags.NO_ACCESS_CONTROL}, aces=[])
 
 
 def test_sddl_none_dacl():
@@ -157,4 +158,4 @@ def test_sddl_none_dacl():
 def test_sddl_sacl():
     test = "O:SYG:SYD:(A;;CCLCSWRPWPDTLOCRRC;;;SY)S:"
     parsed = parser.sddl_item.parse(test)
-    assert parsed.sacl == SACL(flags=["NULL_DACL"], aces=[])
+    assert parsed.sacl == ACL(flags={SDDLFlags.NO_ACCESS_CONTROL}, aces=[])

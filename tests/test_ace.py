@@ -1,8 +1,9 @@
 from sddl_parser import parser as parser
 from sddl_parser import api
 from sddl_parser.parser import ACE
-from sddl_parser.rights_enums import GenericAccessRights
-from sddl_parser.type_enums import AceType
+from sddl_parser.ace_rights_enums import GenericAccessRights
+from sddl_parser.enums import AceType, AceFlags
+from sddl_parser.sid_enum import SIDEnum
 
 
 def test_standard():
@@ -10,7 +11,7 @@ def test_standard():
     parsed = api.parse_ace(test)
     assert parsed == ACE(
         type=AceType.ACCESS_ALLOWED,
-        flags=[],
+        flags=set(),
         rights_int=0x1200A9,
         rights={
             GenericAccessRights.ACCESS0,
@@ -22,7 +23,7 @@ def test_standard():
         },
         object_guid="",
         inherit_object_guid="",
-        sid="LOCAL_SYSTEM",
+        sid=SIDEnum.LOCAL_SYSTEM,
     )
 
 
@@ -31,7 +32,7 @@ def test_sid():
     parsed = api.parse_ace(test)
     assert parsed == parser.ACE(
         type=AceType.ACCESS_ALLOWED,
-        flags=["INHERITED"],
+        flags={AceFlags.INHERITED},
         rights_int=0x1200A9,
         rights={
             GenericAccessRights.ACCESS0,
@@ -52,7 +53,7 @@ def test_empty_flags():
     parsed = api.parse_ace(test)
     assert parsed == ACE(
         type=AceType.ACCESS_ALLOWED,
-        flags=[],
+        flags=set(),
         rights_int=0x1200A9,
         rights={
             GenericAccessRights.ACCESS0,
@@ -64,7 +65,7 @@ def test_empty_flags():
         },
         object_guid="",
         inherit_object_guid="",
-        sid="LOCAL_SYSTEM",
+        sid=SIDEnum.LOCAL_SYSTEM,
     )
 
 
@@ -73,7 +74,7 @@ def test_known_sid():
     parsed = api.parse_ace(test)
     assert parsed == parser.ACE(
         type=AceType.ACCESS_ALLOWED,
-        flags=["INHERITED"],
+        flags={AceFlags.INHERITED},
         rights_int=0x1200A9,
         rights={
             GenericAccessRights.ACCESS0,
@@ -85,7 +86,7 @@ def test_known_sid():
         },
         object_guid="",
         inherit_object_guid="",
-        sid="ALL_APP_PACKAGES",
+        sid=SIDEnum.ALL_APP_PACKAGES,
     )
 
 
@@ -94,7 +95,7 @@ def test_with_conditional_ace():
     parsed = api.parse_ace(test)
     assert parsed == ACE(
         type=AceType.ACCESS_ALLOWED_CALLBACK,
-        flags=["INHERITED"],
+        flags={AceFlags.INHERITED},
         rights_int=0x1200A9,
         rights={
             GenericAccessRights.ACCESS0,
@@ -106,7 +107,7 @@ def test_with_conditional_ace():
         },
         object_guid="",
         inherit_object_guid="",
-        sid="BUILTIN_USERS",
+        sid=SIDEnum.BUILTIN_USERS,
         conditional_ace='(WIN://SYSAPPID Contains "Microsoft.MicrosoftEdge.Stable_abcdefghijk")',
     )
 
@@ -128,7 +129,11 @@ def test_flags_multiple():
     parsed = api.parse_ace(test)
     assert parsed == ACE(
         type=AceType.ACCESS_ALLOWED,
-        flags=["OBJECT_INHERIT", "CONTAINER_INHERIT", "INHERIT_ONLY"],
+        flags={
+            AceFlags.OBJECT_INHERIT,
+            AceFlags.CONTAINER_INHERIT,
+            AceFlags.INHERIT_ONLY,
+        },
         rights_int=0x10000000,
         rights={GenericAccessRights.GENERIC_ALL},
         object_guid="",
@@ -143,7 +148,7 @@ def test_rights_multiple():
     parsed = api.parse_ace(test)
     assert parsed == ACE(
         type=AceType.ACCESS_ALLOWED,
-        flags=[],
+        flags=set(),
         rights_int=0x2018D,
         rights={
             GenericAccessRights.ACCESS0,
@@ -155,6 +160,6 @@ def test_rights_multiple():
         },
         object_guid="",
         inherit_object_guid="",
-        sid="SERVICE",
+        sid=SIDEnum.SERVICE,
         conditional_ace=None,
     )

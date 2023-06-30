@@ -1,7 +1,5 @@
 from enum import IntEnum
 
-# TODO: Maybe when I get bored one day, I'll make a class for subclassing enums. Why isn't that implemented already? Probably a good reason
-
 
 class GenericAccessRights(IntEnum):
     ACCESS0 = 0x1
@@ -158,33 +156,6 @@ class FileAccessRights(IntEnum):
         | FILE_EXECUTE
         | SYNCHRONIZE
     )
-
-
-class FileDirectoryAccessRights(IntEnum):
-    """
-    https://learn.microsoft.com/en-us/windows/win32/fileio/file-access-rights-constants
-    """
-
-    FILE_LIST_DIRECTORY = GenericAccessRights.ACCESS0
-    FILE_ADD_FILE = GenericAccessRights.ACCESS1
-    FILE_ADD_SUBDIRECTORY = GenericAccessRights.ACCESS2
-    FILE_READ_EA = GenericAccessRights.ACCESS3
-    FILE_WRITE_EA = GenericAccessRights.ACCESS4
-    FILE_TRAVERSE = GenericAccessRights.ACCESS5
-    FILE_DELETE_CHILD = GenericAccessRights.ACCESS6
-    FILE_READ_ATTRIBUTES = GenericAccessRights.ACCESS7
-    FILE_WRITE_ATTRIBUTES = GenericAccessRights.ACCESS8
-    GENERIC_READ = GenericAccessRights.GENERIC_READ
-    GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
-    GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
-    GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
-    READ_CONTROL = GenericAccessRights.READ_CONTROL
-    WRITE_DAC = GenericAccessRights.WRITE_DAC
-    WRITE_OWNER = GenericAccessRights.WRITE_OWNER
-    SYNCHRONIZE = GenericAccessRights.SYNCHRONIZE
-    MAXIMUM_ALLOWED = GenericAccessRights.MAXIMUM_ALLOWED
-    ACCESS_SYSTEM_SECURITY = GenericAccessRights.ACCESS_SYSTEM_SECURITY
 
 
 class RegistryKeyAccessRights(IntEnum):
@@ -344,6 +315,10 @@ class EventAccessRights(IntEnum):
 
 
 class FileDirectoryAccessRights(IntEnum):
+    """
+    https://learn.microsoft.com/en-us/windows/win32/fileio/file-access-rights-constants
+    """
+
     FILE_LIST_DIRECTORY = GenericAccessRights.ACCESS0
     FILE_ADD_FILE = GenericAccessRights.ACCESS1
     FILE_ADD_SUBDIRECTORY = GenericAccessRights.ACCESS2
@@ -1090,3 +1065,55 @@ class SamUserAccessRights(IntEnum):
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
     MAXIMUM_ALLOWED = GenericAccessRights.MAXIMUM_ALLOWED
     ACCESS_SYSTEM_SECURITY = GenericAccessRights.ACCESS_SYSTEM_SECURITY
+
+
+# TODO: Maybe when I get bored one day, I'll make a class for subclassing enums. Why isn't that implemented already? Probably a good reason
+
+AllRightsT = (
+    AlpcAccessRights
+    | AuditAccessRights
+    | DebugAccessRights
+    | DesktopAccessRights
+    | DirectoryAccessRights
+    | DirectoryServiceAccessRights
+    | EnlistmentAccessRights
+    | EventAccessRights
+    | FileAccessRights
+    | FileDirectoryAccessRights
+    | FilterConnectionPortAccessRights
+    | FirewallAccessRights
+    | FirewallFilterAccessRights
+    | GenericAccessRights
+    | IoCompletionAccessRights
+    | JobAccessRights
+    | KeyAccessRights
+    | LsaAccountAccessRights
+    | LsaPolicyAccessRights
+    | LsaSecretAccessRights
+    | LsaTrustedDomainAccessRights
+    | MemoryPartitionAccessRights
+    | MutantAccessRights
+    | PrintSpoolerAccessRights
+    | ProcessAccessRights
+    | RegistryKeyAccessRights
+    | RegistryTransactionAccessRights
+    | ResourceManagerAccessRights
+    | SamAliasAccessRights
+    | SamDomainAccessRights
+    | SamGroupAccessRights
+    | SamServerAccessRights
+    | SamUserAccessRights
+    | SemaphoreAccessRights
+    | ServiceAccessRights
+    | ServiceControlManagerAccessRights
+    | SessionAccessRights
+    | SymbolicLinkAccessRights
+    | ThreadAccessRights
+    | TimerAccessRights
+    | TokenAccessRights
+    | TraceAccessRights
+    | TransactionAccessRights
+    | TransactionManagerAccessRights
+    | WindowStationAccessRights
+    | WnfAccessRights
+)

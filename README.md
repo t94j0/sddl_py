@@ -11,18 +11,18 @@ Parse an SDDL string
 >> sddl = "O:SYG:SYD:AI(A;ID;GA;;;SY)"
 >> parse_sddl(sddl)
 SDDL(
-    owner="LOCAL_SYSTEM",
-    group="LOCAL_SYSTEM",
-    dacl=DACL(
-        flags=["SDDL_AUTO_INHERITED"],
+    owner=SIDEnum.LOCAL_SYSTEM,
+    group=SIDEnum.LOCAL_SYSTEM,
+    dacl=ACL(
+        flags={SDDLFlags.SDDL_AUTO_INHERITED},
         aces=[
             ACE(
                 type=AceType.ACCESS_ALLOWED,
-                flags=["INHERITED"],
+                flags={AceFlags.INHERITED},
                 object_guid="",
                 rights_int=268435456,
                 inherit_object_guid="",
-                sid="LOCAL_SYSTEM",
+                sid=SIDEnum.LOCAL_SYSTEM,
                 conditional_ace=None,
                 rights={GenericAccessRights.GENERIC_ALL},
             )
@@ -40,11 +40,11 @@ Parse an ACE
 >> parse_ace(ace)
 ACE(
     type=AceType.ACCESS_ALLOWED,
-    flags=["INHERITED"],
+    flags={AceFlags.INHERITED},
     object_guid="",
     rights_int=65584,
     inherit_object_guid="",
-    sid="ALL_APP_PACKAGES",
+    sid=SIDEnum.ALL_APP_PACKAGES,
     conditional_ace=None,
     rights={
         GenericAccessRights.ACCESS4,
@@ -63,16 +63,21 @@ See that `GenericAccessRights.ACCESS4` is returned. That's an indication that th
 >> parse_ace(ace).as_type(FileAccessRights)
 ACE(
     type=AceType.ACCESS_ALLOWED,
-    flags=["INHERITED"],
+    flags={AceFlags.INHERITED},
     object_guid="",
-    rights_int=65584,
+    rights_int=1179817,
     inherit_object_guid="",
-    sid="ALL_APP_PACKAGES",
+    sid=SIDEnum.ALL_APP_PACKAGES,
     conditional_ace=None,
     rights={
-        FileAccessRights.FILE_WRITE_EA,
-        FileAccessRights.DELETE,
         FileAccessRights.FILE_EXECUTE,
+        FileAccessRights.FILE_READ_DATA,
+        FileAccessRights.FILE_READ_ATTRIBUTES,
+        FileAccessRights.READ_CONTROL,
+        FileAccessRights.SYNCHRONIZE,
+        FileAccessRights.FILE_GENERIC_EXECUTE,
+        FileAccessRights.FILE_READ_EA,
+        FileAccessRights.FILE_GENERIC_READ,
     },
 )
 ```
