@@ -84,6 +84,21 @@ ACE(
 
 All rights are IntEnums, so if you want to check for generic rights, `FileAccessRights.DELETE` is equivalent to `GenericAccessRights.DELETE`
 
+If you want to map SIDs to strings, you can pass in `sidmap`:
+
+```
+>>> from sddl_parser import api
+>>> test = "O:S-1-20-20-20G:SYD:"
+>>> sidmap = {"S-1-20-20-20": "DOMAIN\\user"}
+>>> api.parse_sddl(test, sidmap=sidmap)
+SDDL(
+    owner="DOMAIN\\user",
+    group=SIDEnum.LOCAL_SYSTEM,
+    dacl=ACL(flags={SDDLFlags.NO_ACCESS_CONTROL}, aces=[]),
+    sacl=None,
+)
+```
+
 # Access Rights Available
 
 All right enums are given here
