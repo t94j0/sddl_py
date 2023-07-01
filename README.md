@@ -86,7 +86,7 @@ All rights are IntEnums, so if you want to check for generic rights, `FileAccess
 
 If you want to map SIDs to strings, you can pass in `sidmap`:
 
-```
+```py
 >>> from sddl_parser import api
 >>> test = "O:S-1-20-20-20G:SYD:"
 >>> sidmap = {"S-1-20-20-20": "DOMAIN\\user"}
