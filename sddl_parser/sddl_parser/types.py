@@ -40,6 +40,14 @@ class ACE:
         sid = self.sid.name if isinstance(self.sid, SIDEnum) else self.sid
         return f"{' '*indent}{self.type.name} {flags} {rights} {sid}"
 
+    def asdict(self) -> dict:
+        return {
+            "type": self.type.name,
+            "flags": [f.name for f in self.flags],
+            "rights": [r.name for r in self.rights],
+            "sid": self.sid.name if isinstance(self.sid, SIDEnum) else self.sid,
+        }
+
 
 @dataclass
 class ACL:
@@ -51,6 +59,12 @@ class ACL:
             f"{' '*indent}{' '.join([f'{f.name}' for f in self.flags])}\n"
             + "\n".join([ace.pformat(indent + 2) for ace in self.aces])
         )
+
+    def asdict(self) -> dict:
+        return {
+            "flags": [f.name for f in self.flags],
+            "aces": [ace.asdict() for ace in self.aces],
+        }
 
 
 @dataclass
@@ -78,3 +92,11 @@ class SDDL:
             + f"{' '*indent}DACL:\n{self.dacl.pformat(indent+2) if self.dacl is not None else ''}\n"
             + f"{' '*indent}SACL:\n{self.sacl.pformat(indent+2) if self.sacl is not None else ''}"
         )
+
+    def asdict(self) -> dict:
+        return {
+            "owner": self.owner.name if isinstance(self.owner, SIDEnum) else self.owner,
+            "group": self.group.name if isinstance(self.group, SIDEnum) else self.group,
+            "dacl": self.dacl.asdict() if self.dacl is not None else None,
+            "sacl": self.sacl.asdict() if self.sacl is not None else None,
+        }
