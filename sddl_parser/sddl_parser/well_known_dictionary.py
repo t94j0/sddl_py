@@ -28,6 +28,7 @@ ACE_TYPE: Dict[str, AceType] = {
     "FL": AceType.SYSTEM_ACCESS_FILTER,
 }
 
+# MS-DTYP - 2.5.1.1
 ACE_FLAGS = {
     "CI": AceFlags.CONTAINER_INHERIT,
     "OI": AceFlags.OBJECT_INHERIT,
@@ -36,23 +37,24 @@ ACE_FLAGS = {
     "ID": AceFlags.INHERITED,
     "SA": AceFlags.AUDIT_SUCCESS,
     "FA": AceFlags.AUDIT_FAILURE,
-    "TP": AceFlags.TRUST_PROTECTED_FILTER
-    # TODO: CR missing - https://learn.microsoft.com/en-us/windows/win32/secauthz/ace-strings
+    # https://learn.microsoft.com/en-us/windows/win32/secauthz/ace-strings
+    "TP": AceFlags.TRUST_PROTECTED_FILTER,
+    "CR": AceFlags.CRITICAL,
 }
 
 
 # https://github.com/tpn/winsdk-10/blob/master/Include/10.0.14393.0/shared/sddl.h#L123
 ACE_RIGHTS: Dict[str, int] = {
-    "CC": GenericAccessRights.ACCESS0,
-    "DC": GenericAccessRights.ACCESS1,
-    "LC": GenericAccessRights.ACCESS2,
-    "SW": GenericAccessRights.ACCESS3,
-    "RP": GenericAccessRights.ACCESS4,
-    "WP": GenericAccessRights.ACCESS5,
-    "DT": GenericAccessRights.ACCESS6,
-    "LO": GenericAccessRights.ACCESS7,
-    "CR": GenericAccessRights.ACCESS8,
-    "SD": GenericAccessRights.DELETE,
+    "CC": GenericAccessRights.CREATE_CHILD,
+    "DC": GenericAccessRights.DELETE_CHILD,
+    "LC": GenericAccessRights.LIST_CHILDREN,
+    "SW": GenericAccessRights.SELF_WRITE,
+    "RP": GenericAccessRights.READ_PROPERTY,
+    "WP": GenericAccessRights.WRITE_PROPERTY,
+    "DT": GenericAccessRights.DELETE_TREE,
+    "LO": GenericAccessRights.LIST_OBJECT,
+    "CR": GenericAccessRights.CONTROL_ACCESS,
+    "SD": GenericAccessRights.STANDARD_DELETE,
     "RC": GenericAccessRights.READ_CONTROL,
     "WD": GenericAccessRights.WRITE_DAC,
     "WO": GenericAccessRights.WRITE_OWNER,

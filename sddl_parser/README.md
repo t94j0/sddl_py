@@ -47,9 +47,9 @@ ACE(
     sid=SIDEnum.ALL_APP_PACKAGES,
     conditional_ace=None,
     rights={
-        GenericAccessRights.ACCESS4,
+        GenericAccessRights.READ_PROPERTY,
         GenericAccessRights.DELETE,
-        GenericAccessRights.ACCESS5,
+        GenericAccessRights.WRITE_PROPERTY,
     },
 )
 ```

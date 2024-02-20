@@ -1,7 +1,7 @@
 from sddl_parser.types import SDDL, ACE
 from sddl_parser.parser import sddl_item, parse_ace_entry
 from sddl_parser.ace_rights_enums import GenericAccessRights, AllRightsT
-from typing import Dict
+from typing import Dict, Optional
 
 
 def convert_sddl_sids(sddl: SDDL, sids: Dict[str, str]) -> SDDL:
@@ -34,7 +34,9 @@ def parse_sddl(
     sddl: str,
     as_type: type[AllRightsT] = GenericAccessRights,
     sidmap: Dict[str, str] = {},
-) -> SDDL:
+) -> Optional[SDDL]:
+    if sddl == "":
+        return None
     sddl_entry: SDDL = sddl_item.parse(sddl)
     return convert_sddl_sids(sddl_entry, sidmap).as_type(as_type)
 

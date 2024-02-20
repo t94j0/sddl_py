@@ -109,7 +109,7 @@ inherit_object_guid = string("")
 def parse_conditional_ace() -> Parser:
     """
     Conditional ACEs are wrapped in a parenthetical. This parser will parse the
-    contents of the parenthetical.  Inside the parenthesis, there can be multiple
+    contents of the parenthetical. Inside the parenthesis, there can be multiple
     parentheticals, so we need to parse until we reach the end of the
     parenthetical, but not go over into the next ACE. This means we need to
     match up every open paren with a close paren and only consume a single group

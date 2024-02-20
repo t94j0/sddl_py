@@ -9,6 +9,11 @@ class SDDLFlags(Enum):
 
 
 class AceFlags(IntEnum):
+    """
+    MS-DYP - 2.4.4.1 AceFlags
+    winnt.h
+    """
+
     OBJECT_INHERIT = 0x01
     CONTAINER_INHERIT = 0x02
     NO_PROPAGATE = 0x04
@@ -17,10 +22,14 @@ class AceFlags(IntEnum):
     AUDIT_SUCCESS = 0x40
     TRUST_PROTECTED_FILTER = 0x40
     AUDIT_FAILURE = 0x80
-    # CRITICAL_ACE_FLAG - Can't find this value
+    CRITICAL = 0x20
 
 
 class AceType(IntEnum):
+    """
+    MS-DTYP - 2.4.4.1 AceType
+    """
+
     ACCESS_ALLOWED = 0x0
     ACCESS_DENIED = 0x1
     SYSTEM_AUDIT = 0x2

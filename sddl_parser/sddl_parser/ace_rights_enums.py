@@ -2,15 +2,19 @@ from enum import IntEnum
 
 
 class GenericAccessRights(IntEnum):
-    ACCESS0 = 0x1
-    ACCESS1 = 0x2
-    ACCESS2 = 0x4
-    ACCESS3 = 0x8
-    ACCESS4 = 0x10
-    ACCESS5 = 0x20
-    ACCESS6 = 0x40
-    ACCESS7 = 0x80
-    ACCESS8 = 0x100
+    """
+    Name comes from sddl.h
+    """
+
+    CREATE_CHILD = 0x1
+    DELETE_CHILD = 0x2
+    LIST_CHILDREN = 0x4
+    SELF_WRITE = 0x8
+    READ_PROPERTY = 0x10
+    WRITE_PROPERTY = 0x20
+    DELETE_TREE = 0x40
+    LIST_OBJECT = 0x80
+    CONTROL_ACCESS = 0x100
     ACCESS9 = 0x200
     ACCESS10 = 0x400
     ACCESS11 = 0x800
@@ -18,7 +22,7 @@ class GenericAccessRights(IntEnum):
     ACCESS13 = 0x2000
     ACCESS14 = 0x4000
     ACCESS15 = 0x8000
-    DELETE = 0x10000
+    STANDARD_DELETE = 0x10000
     READ_CONTROL = 0x20000
     WRITE_DAC = 0x40000
     WRITE_OWNER = 0x80000
@@ -29,10 +33,12 @@ class GenericAccessRights(IntEnum):
     GENERIC_EXECUTE = 0x20000000
     GENERIC_WRITE = 0x40000000
     GENERIC_READ = 0x80000000
-    STANDARD_RIGHTS_ALL = DELETE | READ_CONTROL | WRITE_DAC | WRITE_OWNER | SYNCHRONIZE
+    STANDARD_RIGHTS_ALL = (
+        STANDARD_DELETE | READ_CONTROL | WRITE_DAC | WRITE_OWNER | SYNCHRONIZE
+    )
     STANDARD_RIGHTS_EXECUTE = READ_CONTROL
     STANDARD_RIGHTS_READ = READ_CONTROL
-    STANDARD_RIGHTS_REQUIRED = DELETE | READ_CONTROL | WRITE_DAC | WRITE_OWNER
+    STANDARD_RIGHTS_REQUIRED = STANDARD_DELETE | READ_CONTROL | WRITE_DAC | WRITE_OWNER
     STANDARD_RIGHTS_WRITE = READ_CONTROL
 
 
@@ -41,12 +47,12 @@ class ServiceControlManagerAccessRights(IntEnum):
     https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/0d7a7011-9f41-470d-ad52-8535b47ac282
     """
 
-    SC_MANAGER_CONNECT = GenericAccessRights.ACCESS0
-    SC_MANAGER_CREATE_SERVICE = GenericAccessRights.ACCESS1
-    SC_MANAGER_ENUMERATE_SERVICE = GenericAccessRights.ACCESS2
-    SC_MANAGER_LOCK = GenericAccessRights.ACCESS3
-    SC_MANAGER_QUERY_LOCK_STATUS = GenericAccessRights.ACCESS4
-    SC_MANAGER_MODIFY_BOOT_CONFIG = GenericAccessRights.ACCESS5
+    SC_MANAGER_CONNECT = GenericAccessRights.CREATE_CHILD
+    SC_MANAGER_CREATE_SERVICE = GenericAccessRights.DELETE_CHILD
+    SC_MANAGER_ENUMERATE_SERVICE = GenericAccessRights.LIST_CHILDREN
+    SC_MANAGER_LOCK = GenericAccessRights.SELF_WRITE
+    SC_MANAGER_QUERY_LOCK_STATUS = GenericAccessRights.READ_PROPERTY
+    SC_MANAGER_MODIFY_BOOT_CONFIG = GenericAccessRights.WRITE_PROPERTY
     SC_MANAGER_ALL_ACCESS = (
         GenericAccessRights.STANDARD_RIGHTS_REQUIRED.value
         | SC_MANAGER_CONNECT
@@ -60,7 +66,7 @@ class ServiceControlManagerAccessRights(IntEnum):
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -74,15 +80,15 @@ class ServiceAccessRights(IntEnum):
     https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/0d7a7011-9f41-470d-ad52-8535b47ac282
     """
 
-    SERVICE_QUERY_CONFIG = GenericAccessRights.ACCESS0
-    SERVICE_CHANGE_CONFIG = GenericAccessRights.ACCESS1
-    SERVICE_QUERY_STATUS = GenericAccessRights.ACCESS2
-    SERVICE_ENUMERATE_DEPENDENTS = GenericAccessRights.ACCESS3
-    SERVICE_START = GenericAccessRights.ACCESS4
-    SERVICE_STOP = GenericAccessRights.ACCESS5
-    SERVICE_PAUSE_CONTINUE = GenericAccessRights.ACCESS6
-    SERVICE_INTERROGATE = GenericAccessRights.ACCESS7
-    SERVICE_USER_DEFINED_CONTROL = GenericAccessRights.ACCESS8
+    SERVICE_QUERY_CONFIG = GenericAccessRights.CREATE_CHILD
+    SERVICE_CHANGE_CONFIG = GenericAccessRights.DELETE_CHILD
+    SERVICE_QUERY_STATUS = GenericAccessRights.LIST_CHILDREN
+    SERVICE_ENUMERATE_DEPENDENTS = GenericAccessRights.SELF_WRITE
+    SERVICE_START = GenericAccessRights.READ_PROPERTY
+    SERVICE_STOP = GenericAccessRights.WRITE_PROPERTY
+    SERVICE_PAUSE_CONTINUE = GenericAccessRights.DELETE_TREE
+    SERVICE_INTERROGATE = GenericAccessRights.LIST_OBJECT
+    SERVICE_USER_DEFINED_CONTROL = GenericAccessRights.CONTROL_ACCESS
     SERVICE_SET_STATUS = GenericAccessRights.ACCESS15
     SERVICE_ALL_ACCESS = (
         GenericAccessRights.STANDARD_RIGHTS_REQUIRED.value
@@ -100,7 +106,7 @@ class ServiceAccessRights(IntEnum):
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -114,20 +120,20 @@ class FileAccessRights(IntEnum):
     https://learn.microsoft.com/en-us/windows/win32/fileio/file-access-rights-constants
     """
 
-    FILE_READ_DATA = GenericAccessRights.ACCESS0
-    FILE_WRITE_DATA = GenericAccessRights.ACCESS1
-    FILE_APPEND_DATA = GenericAccessRights.ACCESS2
-    FILE_READ_EA = GenericAccessRights.ACCESS3
-    FILE_WRITE_EA = GenericAccessRights.ACCESS4
-    FILE_EXECUTE = GenericAccessRights.ACCESS5
-    FILE_DELETE_CHILD = GenericAccessRights.ACCESS6
-    FILE_READ_ATTRIBUTES = GenericAccessRights.ACCESS7
-    FILE_WRITE_ATTRIBUTES = GenericAccessRights.ACCESS8
+    FILE_READ_DATA = GenericAccessRights.CREATE_CHILD
+    FILE_WRITE_DATA = GenericAccessRights.DELETE_CHILD
+    FILE_APPEND_DATA = GenericAccessRights.LIST_CHILDREN
+    FILE_READ_EA = GenericAccessRights.SELF_WRITE
+    FILE_WRITE_EA = GenericAccessRights.READ_PROPERTY
+    FILE_EXECUTE = GenericAccessRights.WRITE_PROPERTY
+    FILE_DELETE_CHILD = GenericAccessRights.DELETE_TREE
+    FILE_READ_ATTRIBUTES = GenericAccessRights.LIST_OBJECT
+    FILE_WRITE_ATTRIBUTES = GenericAccessRights.CONTROL_ACCESS
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -163,19 +169,19 @@ class RegistryKeyAccessRights(IntEnum):
     https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-key-security-and-access-rights
     """
 
-    KEY_QUERY_VALUE = GenericAccessRights.ACCESS0
-    KEY_SET_VALUE = GenericAccessRights.ACCESS1
-    KEY_CREATE_SUB_KEY = GenericAccessRights.ACCESS2
-    KEY_ENUMERATE_SUB_KEYS = GenericAccessRights.ACCESS3
-    KEY_NOTIFY = GenericAccessRights.ACCESS4
-    KEY_CREATE_LINK = GenericAccessRights.ACCESS5
-    KEY_WOW64_64KEY = GenericAccessRights.ACCESS8
+    KEY_QUERY_VALUE = GenericAccessRights.CREATE_CHILD
+    KEY_SET_VALUE = GenericAccessRights.DELETE_CHILD
+    KEY_CREATE_SUB_KEY = GenericAccessRights.LIST_CHILDREN
+    KEY_ENUMERATE_SUB_KEYS = GenericAccessRights.SELF_WRITE
+    KEY_NOTIFY = GenericAccessRights.READ_PROPERTY
+    KEY_CREATE_LINK = GenericAccessRights.WRITE_PROPERTY
+    KEY_WOW64_64KEY = GenericAccessRights.CONTROL_ACCESS
     KEY_WOW64_32KEY = GenericAccessRights.ACCESS9
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -206,12 +212,12 @@ class RegistryKeyAccessRights(IntEnum):
 
 
 class AlpcAccessRights(IntEnum):
-    PORT_CONNECT = GenericAccessRights.ACCESS0
+    PORT_CONNECT = GenericAccessRights.CREATE_CHILD
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -221,15 +227,15 @@ class AlpcAccessRights(IntEnum):
 
 
 class DebugAccessRights(IntEnum):
-    DEBUG_READ_EVENT = GenericAccessRights.ACCESS0
-    DEBUG_PROCESS_ASSIGN = GenericAccessRights.ACCESS1
-    DEBUG_SET_INFORMATION = GenericAccessRights.ACCESS2
-    DEBUG_QUERY_INFORMATION = GenericAccessRights.ACCESS3
+    DEBUG_READ_EVENT = GenericAccessRights.CREATE_CHILD
+    DEBUG_PROCESS_ASSIGN = GenericAccessRights.DELETE_CHILD
+    DEBUG_SET_INFORMATION = GenericAccessRights.LIST_CHILDREN
+    DEBUG_QUERY_INFORMATION = GenericAccessRights.SELF_WRITE
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -239,20 +245,20 @@ class DebugAccessRights(IntEnum):
 
 
 class DesktopAccessRights(IntEnum):
-    DESKTOP_READOBJECTS = GenericAccessRights.ACCESS0
-    DESKTOP_CREATEWINDOW = GenericAccessRights.ACCESS1
-    DESKTOP_CREATEMENU = GenericAccessRights.ACCESS2
-    DESKTOP_HOOKCONTROL = GenericAccessRights.ACCESS3
-    DESKTOP_JOURNALRECORD = GenericAccessRights.ACCESS4
-    DESKTOP_JOURNALPLAYBACK = GenericAccessRights.ACCESS5
-    DESKTOP_ENUMERATE = GenericAccessRights.ACCESS6
-    DESKTOP_WRITEOBJECTS = GenericAccessRights.ACCESS7
-    DESKTOP_SWITCHDESKTOP = GenericAccessRights.ACCESS8
+    DESKTOP_READOBJECTS = GenericAccessRights.CREATE_CHILD
+    DESKTOP_CREATEWINDOW = GenericAccessRights.DELETE_CHILD
+    DESKTOP_CREATEMENU = GenericAccessRights.LIST_CHILDREN
+    DESKTOP_HOOKCONTROL = GenericAccessRights.SELF_WRITE
+    DESKTOP_JOURNALRECORD = GenericAccessRights.READ_PROPERTY
+    DESKTOP_JOURNALPLAYBACK = GenericAccessRights.WRITE_PROPERTY
+    DESKTOP_ENUMERATE = GenericAccessRights.DELETE_TREE
+    DESKTOP_WRITEOBJECTS = GenericAccessRights.LIST_OBJECT
+    DESKTOP_SWITCHDESKTOP = GenericAccessRights.CONTROL_ACCESS
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -262,15 +268,15 @@ class DesktopAccessRights(IntEnum):
 
 
 class DirectoryAccessRights(IntEnum):
-    DIRECTORY_QUERY = GenericAccessRights.ACCESS0
-    DIRECTORY_TRAVERSE = GenericAccessRights.ACCESS1
-    DIRECTORY_CREATE_OBJECT = GenericAccessRights.ACCESS2
-    DIRECTORY_CREATE_SUBDIRECTORY = GenericAccessRights.ACCESS3
+    DIRECTORY_QUERY = GenericAccessRights.CREATE_CHILD
+    DIRECTORY_TRAVERSE = GenericAccessRights.DELETE_CHILD
+    DIRECTORY_CREATE_OBJECT = GenericAccessRights.LIST_CHILDREN
+    DIRECTORY_CREATE_SUBDIRECTORY = GenericAccessRights.SELF_WRITE
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -280,16 +286,16 @@ class DirectoryAccessRights(IntEnum):
 
 
 class EnlistmentAccessRights(IntEnum):
-    ENLISTMENT_QUERY_INFORMATION = GenericAccessRights.ACCESS0
-    ENLISTMENT_SET_INFORMATION = GenericAccessRights.ACCESS1
-    ENLISTMENT_RECOVER = GenericAccessRights.ACCESS2
-    ENLISTMENT_SUBORDINATE_RIGHTS = GenericAccessRights.ACCESS3
-    ENLISTMENT_SUPERIOR_RIGHTS = GenericAccessRights.ACCESS4
+    ENLISTMENT_QUERY_INFORMATION = GenericAccessRights.CREATE_CHILD
+    ENLISTMENT_SET_INFORMATION = GenericAccessRights.DELETE_CHILD
+    ENLISTMENT_RECOVER = GenericAccessRights.LIST_CHILDREN
+    ENLISTMENT_SUBORDINATE_RIGHTS = GenericAccessRights.SELF_WRITE
+    ENLISTMENT_SUPERIOR_RIGHTS = GenericAccessRights.READ_PROPERTY
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -299,13 +305,13 @@ class EnlistmentAccessRights(IntEnum):
 
 
 class EventAccessRights(IntEnum):
-    EVENT_QUERY_STATE = GenericAccessRights.ACCESS0
-    EVENT_MODIFY_STATE = GenericAccessRights.ACCESS1
+    EVENT_QUERY_STATE = GenericAccessRights.CREATE_CHILD
+    EVENT_MODIFY_STATE = GenericAccessRights.DELETE_CHILD
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -319,20 +325,20 @@ class FileDirectoryAccessRights(IntEnum):
     https://learn.microsoft.com/en-us/windows/win32/fileio/file-access-rights-constants
     """
 
-    FILE_LIST_DIRECTORY = GenericAccessRights.ACCESS0
-    FILE_ADD_FILE = GenericAccessRights.ACCESS1
-    FILE_ADD_SUBDIRECTORY = GenericAccessRights.ACCESS2
-    FILE_READ_EA = GenericAccessRights.ACCESS3
-    FILE_WRITE_EA = GenericAccessRights.ACCESS4
-    FILE_TRAVERSE = GenericAccessRights.ACCESS5
-    FILE_DELETE_CHILD = GenericAccessRights.ACCESS6
-    FILE_READ_ATTRIBUTES = GenericAccessRights.ACCESS7
-    FILE_WRITE_ATTRIBUTES = GenericAccessRights.ACCESS8
+    FILE_LIST_DIRECTORY = GenericAccessRights.CREATE_CHILD
+    FILE_ADD_FILE = GenericAccessRights.DELETE_CHILD
+    FILE_ADD_SUBDIRECTORY = GenericAccessRights.LIST_CHILDREN
+    FILE_READ_EA = GenericAccessRights.SELF_WRITE
+    FILE_WRITE_EA = GenericAccessRights.READ_PROPERTY
+    FILE_TRAVERSE = GenericAccessRights.WRITE_PROPERTY
+    FILE_DELETE_CHILD = GenericAccessRights.DELETE_TREE
+    FILE_READ_ATTRIBUTES = GenericAccessRights.LIST_OBJECT
+    FILE_WRITE_ATTRIBUTES = GenericAccessRights.CONTROL_ACCESS
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -342,12 +348,12 @@ class FileDirectoryAccessRights(IntEnum):
 
 
 class FilterConnectionPortAccessRights(IntEnum):
-    FILTER_CONNECTION_PORT_CONNECT = GenericAccessRights.ACCESS0
+    FILTER_CONNECTION_PORT_CONNECT = GenericAccessRights.CREATE_CHILD
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -357,13 +363,13 @@ class FilterConnectionPortAccessRights(IntEnum):
 
 
 class IoCompletionAccessRights(IntEnum):
-    IO_COMPLETION_QUERY_STATE = GenericAccessRights.ACCESS0
-    IO_COMPLETION_SET_COMPLETION = GenericAccessRights.ACCESS1
+    IO_COMPLETION_QUERY_STATE = GenericAccessRights.CREATE_CHILD
+    IO_COMPLETION_SET_COMPLETION = GenericAccessRights.DELETE_CHILD
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -373,17 +379,17 @@ class IoCompletionAccessRights(IntEnum):
 
 
 class JobAccessRights(IntEnum):
-    JOB_ASSIGN_PROCESS = GenericAccessRights.ACCESS0
-    JOB_SET_ATTRIBUTES = GenericAccessRights.ACCESS1
-    JOB_QUERY = GenericAccessRights.ACCESS2
-    JOB_TERMINATE = GenericAccessRights.ACCESS3
-    JOB_SET_SECURITY_ATTRIBUTES = GenericAccessRights.ACCESS4
-    JOB_IMPERSONATE = GenericAccessRights.ACCESS5
+    JOB_ASSIGN_PROCESS = GenericAccessRights.CREATE_CHILD
+    JOB_SET_ATTRIBUTES = GenericAccessRights.DELETE_CHILD
+    JOB_QUERY = GenericAccessRights.LIST_CHILDREN
+    JOB_TERMINATE = GenericAccessRights.SELF_WRITE
+    JOB_SET_SECURITY_ATTRIBUTES = GenericAccessRights.READ_PROPERTY
+    JOB_IMPERSONATE = GenericAccessRights.WRITE_PROPERTY
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -393,17 +399,17 @@ class JobAccessRights(IntEnum):
 
 
 class KeyAccessRights(IntEnum):
-    KEY_QUERY_VALUE = GenericAccessRights.ACCESS0
-    KEY_SET_VALUE = GenericAccessRights.ACCESS1
-    KEY_CREATE_SUB_KEY = GenericAccessRights.ACCESS2
-    KEY_ENUMERATE_SUB_KEYS = GenericAccessRights.ACCESS3
-    KEY_NOTIFY = GenericAccessRights.ACCESS4
-    KEY_CREATE_LINK = GenericAccessRights.ACCESS5
+    KEY_QUERY_VALUE = GenericAccessRights.CREATE_CHILD
+    KEY_SET_VALUE = GenericAccessRights.DELETE_CHILD
+    KEY_CREATE_SUB_KEY = GenericAccessRights.LIST_CHILDREN
+    KEY_ENUMERATE_SUB_KEYS = GenericAccessRights.SELF_WRITE
+    KEY_NOTIFY = GenericAccessRights.READ_PROPERTY
+    KEY_CREATE_LINK = GenericAccessRights.WRITE_PROPERTY
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -413,12 +419,12 @@ class KeyAccessRights(IntEnum):
 
 
 class MutantAccessRights(IntEnum):
-    MUTANT_MODIFY_STATE = GenericAccessRights.ACCESS0
+    MUTANT_MODIFY_STATE = GenericAccessRights.CREATE_CHILD
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -428,13 +434,13 @@ class MutantAccessRights(IntEnum):
 
 
 class MemoryPartitionAccessRights(IntEnum):
-    MEMORY_PARTITION_QUERY_ACCESS = GenericAccessRights.ACCESS0
-    MEMORY_PARTITION_MODIFY_ACCESS = GenericAccessRights.ACCESS1
+    MEMORY_PARTITION_QUERY_ACCESS = GenericAccessRights.CREATE_CHILD
+    MEMORY_PARTITION_MODIFY_ACCESS = GenericAccessRights.DELETE_CHILD
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -444,15 +450,15 @@ class MemoryPartitionAccessRights(IntEnum):
 
 
 class ProcessAccessRights(IntEnum):
-    PROCESS_TERMINATE = GenericAccessRights.ACCESS0
-    PROCESS_CREATE_THREAD = GenericAccessRights.ACCESS1
-    PROCESS_SET_SESSIONID = GenericAccessRights.ACCESS2
-    PROCESS_VM_OPERATION = GenericAccessRights.ACCESS3
-    PROCESS_VM_READ = GenericAccessRights.ACCESS4
-    PROCESS_VM_WRITE = GenericAccessRights.ACCESS5
-    PROCESS_DUP_HANDLE = GenericAccessRights.ACCESS6
-    PROCESS_CREATE_PROCESS = GenericAccessRights.ACCESS7
-    PROCESS_SET_QUOTA = GenericAccessRights.ACCESS8
+    PROCESS_TERMINATE = GenericAccessRights.CREATE_CHILD
+    PROCESS_CREATE_THREAD = GenericAccessRights.DELETE_CHILD
+    PROCESS_SET_SESSIONID = GenericAccessRights.LIST_CHILDREN
+    PROCESS_VM_OPERATION = GenericAccessRights.SELF_WRITE
+    PROCESS_VM_READ = GenericAccessRights.READ_PROPERTY
+    PROCESS_VM_WRITE = GenericAccessRights.WRITE_PROPERTY
+    PROCESS_DUP_HANDLE = GenericAccessRights.DELETE_TREE
+    PROCESS_CREATE_PROCESS = GenericAccessRights.LIST_OBJECT
+    PROCESS_SET_QUOTA = GenericAccessRights.CONTROL_ACCESS
     PROCESS_SET_INFORMATION = GenericAccessRights.ACCESS9
     PROCESS_QUERY_INFORMATION = GenericAccessRights.ACCESS10
     PROCESS_SUSPEND_RESUME = GenericAccessRights.ACCESS11
@@ -462,7 +468,7 @@ class ProcessAccessRights(IntEnum):
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -474,17 +480,17 @@ class ProcessAccessRights(IntEnum):
 
 
 class RegistryTransactionAccessRights(IntEnum):
-    TRANSACTION_QUERY_INFORMATION = GenericAccessRights.ACCESS0
-    TRANSACTION_SET_INFORMATION = GenericAccessRights.ACCESS1
-    TRANSACTION_ENLIST = GenericAccessRights.ACCESS2
-    TRANSACTION_COMMIT = GenericAccessRights.ACCESS3
-    TRANSACTION_ROLLBACK = GenericAccessRights.ACCESS4
-    TRANSACTION_PROPAGATE = GenericAccessRights.ACCESS5
+    TRANSACTION_QUERY_INFORMATION = GenericAccessRights.CREATE_CHILD
+    TRANSACTION_SET_INFORMATION = GenericAccessRights.DELETE_CHILD
+    TRANSACTION_ENLIST = GenericAccessRights.LIST_CHILDREN
+    TRANSACTION_COMMIT = GenericAccessRights.SELF_WRITE
+    TRANSACTION_ROLLBACK = GenericAccessRights.READ_PROPERTY
+    TRANSACTION_PROPAGATE = GenericAccessRights.WRITE_PROPERTY
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -494,18 +500,18 @@ class RegistryTransactionAccessRights(IntEnum):
 
 
 class ResourceManagerAccessRights(IntEnum):
-    RESOURCEMANAGER_QUERY_INFORMATION = GenericAccessRights.ACCESS0
-    RESOURCEMANAGER_SET_INFORMATION = GenericAccessRights.ACCESS1
-    RESOURCEMANAGER_RECOVER = GenericAccessRights.ACCESS2
-    RESOURCEMANAGER_ENLIST = GenericAccessRights.ACCESS3
-    RESOURCEMANAGER_GET_NOTIFICATION = GenericAccessRights.ACCESS4
-    RESOURCEMANAGER_REGISTER_PROTOCOL = GenericAccessRights.ACCESS5
-    RESOURCEMANAGER_COMPLETE_PROPAGATION = GenericAccessRights.ACCESS6
+    RESOURCEMANAGER_QUERY_INFORMATION = GenericAccessRights.CREATE_CHILD
+    RESOURCEMANAGER_SET_INFORMATION = GenericAccessRights.DELETE_CHILD
+    RESOURCEMANAGER_RECOVER = GenericAccessRights.LIST_CHILDREN
+    RESOURCEMANAGER_ENLIST = GenericAccessRights.SELF_WRITE
+    RESOURCEMANAGER_GET_NOTIFICATION = GenericAccessRights.READ_PROPERTY
+    RESOURCEMANAGER_REGISTER_PROTOCOL = GenericAccessRights.WRITE_PROPERTY
+    RESOURCEMANAGER_COMPLETE_PROPAGATION = GenericAccessRights.DELETE_TREE
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -515,17 +521,17 @@ class ResourceManagerAccessRights(IntEnum):
 
 
 class SectionAccessRights(IntEnum):
-    SECTION_QUERY = GenericAccessRights.ACCESS0
-    SECTION_MAP_WRITE = GenericAccessRights.ACCESS1
-    SECTION_MAP_READ = GenericAccessRights.ACCESS2
-    SECTION_MAP_EXECUTE = GenericAccessRights.ACCESS3
-    SECTION_EXTEND_SIZE = GenericAccessRights.ACCESS4
-    SECTION_MAP_EXECUTE_EXPLICIT = GenericAccessRights.ACCESS5
+    SECTION_QUERY = GenericAccessRights.CREATE_CHILD
+    SECTION_MAP_WRITE = GenericAccessRights.DELETE_CHILD
+    SECTION_MAP_READ = GenericAccessRights.LIST_CHILDREN
+    SECTION_MAP_EXECUTE = GenericAccessRights.SELF_WRITE
+    SECTION_EXTEND_SIZE = GenericAccessRights.READ_PROPERTY
+    SECTION_MAP_EXECUTE_EXPLICIT = GenericAccessRights.WRITE_PROPERTY
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -535,13 +541,13 @@ class SectionAccessRights(IntEnum):
 
 
 class SemaphoreAccessRights(IntEnum):
-    SEMAPHORE_QUERY_STATE = GenericAccessRights.ACCESS0
-    SEMAPHORE_MODIFY_STATE = GenericAccessRights.ACCESS1
+    SEMAPHORE_QUERY_STATE = GenericAccessRights.CREATE_CHILD
+    SEMAPHORE_MODIFY_STATE = GenericAccessRights.DELETE_CHILD
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -551,13 +557,13 @@ class SemaphoreAccessRights(IntEnum):
 
 
 class SessionAccessRights(IntEnum):
-    SESSION_QUERY = GenericAccessRights.ACCESS0
-    SESSION_MODIFY = GenericAccessRights.ACCESS1
+    SESSION_QUERY = GenericAccessRights.CREATE_CHILD
+    SESSION_MODIFY = GenericAccessRights.DELETE_CHILD
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -567,13 +573,13 @@ class SessionAccessRights(IntEnum):
 
 
 class SymbolicLinkAccessRights(IntEnum):
-    SYMBOLIC_LINK_QUERY = GenericAccessRights.ACCESS0
-    SYMBOLIC_LINK_SET = GenericAccessRights.ACCESS1
+    SYMBOLIC_LINK_QUERY = GenericAccessRights.CREATE_CHILD
+    SYMBOLIC_LINK_SET = GenericAccessRights.DELETE_CHILD
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -583,15 +589,15 @@ class SymbolicLinkAccessRights(IntEnum):
 
 
 class ThreadAccessRights(IntEnum):
-    THREAD_TERMINATE = GenericAccessRights.ACCESS0
-    THREAD_SUSPEND_RESUME = GenericAccessRights.ACCESS1
-    THREAD_ALERT = GenericAccessRights.ACCESS2
-    THREAD_GET_CONTEXT = GenericAccessRights.ACCESS3
-    THREAD_SET_CONTEXT = GenericAccessRights.ACCESS4
-    THREAD_SET_INFORMATION = GenericAccessRights.ACCESS5
-    THREAD_QUERY_INFORMATION = GenericAccessRights.ACCESS6
-    THREAD_SET_THREAD_TOKEN = GenericAccessRights.ACCESS7
-    THREAD_IMPERSONATE = GenericAccessRights.ACCESS8
+    THREAD_TERMINATE = GenericAccessRights.CREATE_CHILD
+    THREAD_SUSPEND_RESUME = GenericAccessRights.DELETE_CHILD
+    THREAD_ALERT = GenericAccessRights.LIST_CHILDREN
+    THREAD_GET_CONTEXT = GenericAccessRights.SELF_WRITE
+    THREAD_SET_CONTEXT = GenericAccessRights.READ_PROPERTY
+    THREAD_SET_INFORMATION = GenericAccessRights.WRITE_PROPERTY
+    THREAD_QUERY_INFORMATION = GenericAccessRights.DELETE_TREE
+    THREAD_SET_THREAD_TOKEN = GenericAccessRights.LIST_OBJECT
+    THREAD_IMPERSONATE = GenericAccessRights.CONTROL_ACCESS
     THREAD_DIRECT_IMPERSONATION = GenericAccessRights.ACCESS9
     THREAD_SET_LIMITED_INFORMATION = GenericAccessRights.ACCESS10
     THREAD_QUERY_LIMITED_INFORMATION = GenericAccessRights.ACCESS11
@@ -600,7 +606,7 @@ class ThreadAccessRights(IntEnum):
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -611,13 +617,13 @@ class ThreadAccessRights(IntEnum):
 
 
 class TimerAccessRights(IntEnum):
-    TIMER_QUERY_STATE = GenericAccessRights.ACCESS0
-    TIMER_SET_STATE = GenericAccessRights.ACCESS1
+    TIMER_QUERY_STATE = GenericAccessRights.CREATE_CHILD
+    TIMER_SET_STATE = GenericAccessRights.DELETE_CHILD
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -627,20 +633,20 @@ class TimerAccessRights(IntEnum):
 
 
 class TokenAccessRights(IntEnum):
-    TOKEN_ASSIGN_PRIMARY = GenericAccessRights.ACCESS0
-    TOKEN_DUPLICATE = GenericAccessRights.ACCESS1
-    TOKEN_IMPERSONATE = GenericAccessRights.ACCESS2
-    TOKEN_QUERY = GenericAccessRights.ACCESS3
-    TOKEN_QUERY_SOURCE = GenericAccessRights.ACCESS4
-    TOKEN_ADJUST_PRIVILEGES = GenericAccessRights.ACCESS5
-    TOKEN_ADJUST_GROUPS = GenericAccessRights.ACCESS6
-    TOKEN_ADJUST_DEFAULT = GenericAccessRights.ACCESS7
-    TOKEN_ADJUST_SESSIONID = GenericAccessRights.ACCESS8
+    TOKEN_ASSIGN_PRIMARY = GenericAccessRights.CREATE_CHILD
+    TOKEN_DUPLICATE = GenericAccessRights.DELETE_CHILD
+    TOKEN_IMPERSONATE = GenericAccessRights.LIST_CHILDREN
+    TOKEN_QUERY = GenericAccessRights.SELF_WRITE
+    TOKEN_QUERY_SOURCE = GenericAccessRights.READ_PROPERTY
+    TOKEN_ADJUST_PRIVILEGES = GenericAccessRights.WRITE_PROPERTY
+    TOKEN_ADJUST_GROUPS = GenericAccessRights.DELETE_TREE
+    TOKEN_ADJUST_DEFAULT = GenericAccessRights.LIST_OBJECT
+    TOKEN_ADJUST_SESSIONID = GenericAccessRights.CONTROL_ACCESS
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -650,15 +656,15 @@ class TokenAccessRights(IntEnum):
 
 
 class TraceAccessRights(IntEnum):
-    WMIGUID_QUERY = GenericAccessRights.ACCESS0
-    WMIGUID_SET = GenericAccessRights.ACCESS1
-    WMIGUID_NOTIFICATION = GenericAccessRights.ACCESS2
-    WMIGUID_READ_DESCRIPTION = GenericAccessRights.ACCESS3
-    WMIGUID_EXECUTE = GenericAccessRights.ACCESS4
-    TRACELOG_CREATE_REALTIME = GenericAccessRights.ACCESS5
-    TRACELOG_CREATE_ONDISK = GenericAccessRights.ACCESS6
-    TRACELOG_GUID_ENABLE = GenericAccessRights.ACCESS7
-    TRACELOG_ACCESS_KERNEL_LOGGER = GenericAccessRights.ACCESS8
+    WMIGUID_QUERY = GenericAccessRights.CREATE_CHILD
+    WMIGUID_SET = GenericAccessRights.DELETE_CHILD
+    WMIGUID_NOTIFICATION = GenericAccessRights.LIST_CHILDREN
+    WMIGUID_READ_DESCRIPTION = GenericAccessRights.SELF_WRITE
+    WMIGUID_EXECUTE = GenericAccessRights.READ_PROPERTY
+    TRACELOG_CREATE_REALTIME = GenericAccessRights.WRITE_PROPERTY
+    TRACELOG_CREATE_ONDISK = GenericAccessRights.DELETE_TREE
+    TRACELOG_GUID_ENABLE = GenericAccessRights.LIST_OBJECT
+    TRACELOG_ACCESS_KERNEL_LOGGER = GenericAccessRights.CONTROL_ACCESS
     TRACELOG_LOG_EVENT = GenericAccessRights.ACCESS9
     TRACELOG_ACCESS_REALTIME = GenericAccessRights.ACCESS10
     TRACELOG_REGISTER_GUIDS = GenericAccessRights.ACCESS11
@@ -667,7 +673,7 @@ class TraceAccessRights(IntEnum):
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -677,17 +683,17 @@ class TraceAccessRights(IntEnum):
 
 
 class TransactionManagerAccessRights(IntEnum):
-    TRANSACTIONMANAGER_QUERY_INFORMATION = GenericAccessRights.ACCESS0
-    TRANSACTIONMANAGER_SET_INFORMATION = GenericAccessRights.ACCESS1
-    TRANSACTIONMANAGER_RECOVER = GenericAccessRights.ACCESS2
-    TRANSACTIONMANAGER_RENAME = GenericAccessRights.ACCESS3
-    TRANSACTIONMANAGER_CREATE_RM = GenericAccessRights.ACCESS4
-    TRANSACTIONMANAGER_BIND_TRANSACTION = GenericAccessRights.ACCESS5
+    TRANSACTIONMANAGER_QUERY_INFORMATION = GenericAccessRights.CREATE_CHILD
+    TRANSACTIONMANAGER_SET_INFORMATION = GenericAccessRights.DELETE_CHILD
+    TRANSACTIONMANAGER_RECOVER = GenericAccessRights.LIST_CHILDREN
+    TRANSACTIONMANAGER_RENAME = GenericAccessRights.SELF_WRITE
+    TRANSACTIONMANAGER_CREATE_RM = GenericAccessRights.READ_PROPERTY
+    TRANSACTIONMANAGER_BIND_TRANSACTION = GenericAccessRights.WRITE_PROPERTY
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -697,18 +703,18 @@ class TransactionManagerAccessRights(IntEnum):
 
 
 class TransactionAccessRights(IntEnum):
-    TRANSACTION_QUERY_INFORMATION = GenericAccessRights.ACCESS0
-    TRANSACTION_SET_INFORMATION = GenericAccessRights.ACCESS1
-    TRANSACTION_ENLIST = GenericAccessRights.ACCESS2
-    TRANSACTION_COMMIT = GenericAccessRights.ACCESS3
-    TRANSACTION_ROLLBACK = GenericAccessRights.ACCESS4
-    TRANSACTION_PROPAGATE = GenericAccessRights.ACCESS5
-    TRANSACTION_RIGHT_RESERVED1 = GenericAccessRights.ACCESS6
+    TRANSACTION_QUERY_INFORMATION = GenericAccessRights.CREATE_CHILD
+    TRANSACTION_SET_INFORMATION = GenericAccessRights.DELETE_CHILD
+    TRANSACTION_ENLIST = GenericAccessRights.LIST_CHILDREN
+    TRANSACTION_COMMIT = GenericAccessRights.SELF_WRITE
+    TRANSACTION_ROLLBACK = GenericAccessRights.READ_PROPERTY
+    TRANSACTION_PROPAGATE = GenericAccessRights.WRITE_PROPERTY
+    TRANSACTION_RIGHT_RESERVED1 = GenericAccessRights.DELETE_TREE
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -718,20 +724,20 @@ class TransactionAccessRights(IntEnum):
 
 
 class WindowStationAccessRights(IntEnum):
-    WINSTA_ENUMDESKTOPS = GenericAccessRights.ACCESS0
-    WINSTA_READATTRIBUTES = GenericAccessRights.ACCESS1
-    WINSTA_ACCESSCLIPBOARD = GenericAccessRights.ACCESS2
-    WINSTA_CREATEDESKTOP = GenericAccessRights.ACCESS3
-    WINSTA_WRITEATTRIBUTES = GenericAccessRights.ACCESS4
-    WINSTA_ACCESSGLOBALATOMS = GenericAccessRights.ACCESS5
-    WINSTA_EXITWINDOWS = GenericAccessRights.ACCESS6
-    WINSTA_ENUMERATE = GenericAccessRights.ACCESS8
+    WINSTA_ENUMDESKTOPS = GenericAccessRights.CREATE_CHILD
+    WINSTA_READATTRIBUTES = GenericAccessRights.DELETE_CHILD
+    WINSTA_ACCESSCLIPBOARD = GenericAccessRights.LIST_CHILDREN
+    WINSTA_CREATEDESKTOP = GenericAccessRights.SELF_WRITE
+    WINSTA_WRITEATTRIBUTES = GenericAccessRights.READ_PROPERTY
+    WINSTA_ACCESSGLOBALATOMS = GenericAccessRights.WRITE_PROPERTY
+    WINSTA_EXITWINDOWS = GenericAccessRights.DELETE_TREE
+    WINSTA_ENUMERATE = GenericAccessRights.CONTROL_ACCESS
     WINSTA_READSCREEN = GenericAccessRights.ACCESS9
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -741,14 +747,14 @@ class WindowStationAccessRights(IntEnum):
 
 
 class WnfAccessRights(IntEnum):
-    WNF_READ_DATA = GenericAccessRights.ACCESS0
-    WNF_WRITE_DATA = GenericAccessRights.ACCESS1
-    WNF_UNKNOWN_10 = GenericAccessRights.ACCESS4
+    WNF_READ_DATA = GenericAccessRights.CREATE_CHILD
+    WNF_WRITE_DATA = GenericAccessRights.DELETE_CHILD
+    WNF_UNKNOWN_10 = GenericAccessRights.READ_PROPERTY
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -758,22 +764,22 @@ class WnfAccessRights(IntEnum):
 
 
 class FirewallAccessRights(IntEnum):
-    FWPM_ACTRL_ADD = GenericAccessRights.ACCESS0
-    FWPM_ACTRL_ADD_LINK = GenericAccessRights.ACCESS1
-    FWPM_ACTRL_BEGIN_READ_TXN = GenericAccessRights.ACCESS2
-    FWPM_ACTRL_BEGIN_WRITE_TXN = GenericAccessRights.ACCESS3
-    FWPM_ACTRL_CLASSIFY = GenericAccessRights.ACCESS4
-    FWPM_ACTRL_ENUM = GenericAccessRights.ACCESS5
-    FWPM_ACTRL_OPEN = GenericAccessRights.ACCESS6
-    FWPM_ACTRL_READ = GenericAccessRights.ACCESS7
-    FWPM_ACTRL_READ_STATS = GenericAccessRights.ACCESS8
+    FWPM_ACTRL_ADD = GenericAccessRights.CREATE_CHILD
+    FWPM_ACTRL_ADD_LINK = GenericAccessRights.DELETE_CHILD
+    FWPM_ACTRL_BEGIN_READ_TXN = GenericAccessRights.LIST_CHILDREN
+    FWPM_ACTRL_BEGIN_WRITE_TXN = GenericAccessRights.SELF_WRITE
+    FWPM_ACTRL_CLASSIFY = GenericAccessRights.READ_PROPERTY
+    FWPM_ACTRL_ENUM = GenericAccessRights.WRITE_PROPERTY
+    FWPM_ACTRL_OPEN = GenericAccessRights.DELETE_TREE
+    FWPM_ACTRL_READ = GenericAccessRights.LIST_OBJECT
+    FWPM_ACTRL_READ_STATS = GenericAccessRights.CONTROL_ACCESS
     FWPM_ACTRL_SUBSCRIBE = GenericAccessRights.ACCESS9
     FWPM_ACTRL_WRITE = GenericAccessRights.ACCESS10
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -782,12 +788,12 @@ class FirewallAccessRights(IntEnum):
 
 
 class FirewallFilterAccessRights(IntEnum):
-    FWP_ACTRL_MATCH_FILTER = GenericAccessRights.ACCESS0
+    FWP_ACTRL_MATCH_FILTER = GenericAccessRights.CREATE_CHILD
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -796,20 +802,20 @@ class FirewallFilterAccessRights(IntEnum):
 
 
 class DirectoryServiceAccessRights(IntEnum):
-    ACTRL_DS_CREATE_CHILD = GenericAccessRights.ACCESS0
-    ACTRL_DS_DELETE_CHILD = GenericAccessRights.ACCESS1
-    ACTRL_DS_LIST = GenericAccessRights.ACCESS2
-    ACTRL_DS_SELF = GenericAccessRights.ACCESS3
-    ACTRL_DS_READ_PROP = GenericAccessRights.ACCESS4
-    ACTRL_DS_WRITE_PROP = GenericAccessRights.ACCESS5
-    ACTRL_DS_DELETE_TREE = GenericAccessRights.ACCESS6
-    ACTRL_DS_LIST_OBJECT = GenericAccessRights.ACCESS7
-    ACTRL_DS_CONTROL_ACCESS = GenericAccessRights.ACCESS8
+    ACTRL_DS_CREATE_CHILD = GenericAccessRights.CREATE_CHILD
+    ACTRL_DS_DELETE_CHILD = GenericAccessRights.DELETE_CHILD
+    ACTRL_DS_LIST = GenericAccessRights.LIST_CHILDREN
+    ACTRL_DS_SELF = GenericAccessRights.SELF_WRITE
+    ACTRL_DS_READ_PROP = GenericAccessRights.READ_PROPERTY
+    ACTRL_DS_WRITE_PROP = GenericAccessRights.WRITE_PROPERTY
+    ACTRL_DS_DELETE_TREE = GenericAccessRights.DELETE_TREE
+    ACTRL_DS_LIST_OBJECT = GenericAccessRights.LIST_OBJECT
+    ACTRL_DS_CONTROL_ACCESS = GenericAccessRights.CONTROL_ACCESS
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -833,18 +839,18 @@ class DirectoryServiceAccessRights(IntEnum):
 
 
 class PrintSpoolerAccessRights(IntEnum):
-    SERVER_ACCESS_ADMINISTER = GenericAccessRights.ACCESS0
-    SERVER_ACCESS_ENUMERATE = GenericAccessRights.ACCESS1
-    PRINTER_ACCESS_ADMINISTER = GenericAccessRights.ACCESS2
-    PRINTER_ACCESS_USE = GenericAccessRights.ACCESS3
-    JOB_ACCESS_ADMINISTER = GenericAccessRights.ACCESS4
-    JOB_ACCESS_READ = GenericAccessRights.ACCESS5
-    PRINTER_ACCESS_MANAGE_LIMITED = GenericAccessRights.ACCESS6
+    SERVER_ACCESS_ADMINISTER = GenericAccessRights.CREATE_CHILD
+    SERVER_ACCESS_ENUMERATE = GenericAccessRights.DELETE_CHILD
+    PRINTER_ACCESS_ADMINISTER = GenericAccessRights.LIST_CHILDREN
+    PRINTER_ACCESS_USE = GenericAccessRights.SELF_WRITE
+    JOB_ACCESS_ADMINISTER = GenericAccessRights.READ_PROPERTY
+    JOB_ACCESS_READ = GenericAccessRights.WRITE_PROPERTY
+    PRINTER_ACCESS_MANAGE_LIMITED = GenericAccessRights.DELETE_TREE
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -853,18 +859,18 @@ class PrintSpoolerAccessRights(IntEnum):
 
 
 class AuditAccessRights(IntEnum):
-    AUDIT_SET_SYSTEM_POLICY = GenericAccessRights.ACCESS0
-    AUDIT_QUERY_SYSTEM_POLICY = GenericAccessRights.ACCESS1
-    AUDIT_SET_USER_POLICY = GenericAccessRights.ACCESS2
-    AUDIT_QUERY_USER_POLICY = GenericAccessRights.ACCESS3
-    AUDIT_ENUMERATE_USERS = GenericAccessRights.ACCESS4
-    AUDIT_SET_MISC_POLICY = GenericAccessRights.ACCESS5
-    AUDIT_QUERY_MISC_POLICY = GenericAccessRights.ACCESS6
+    AUDIT_SET_SYSTEM_POLICY = GenericAccessRights.CREATE_CHILD
+    AUDIT_QUERY_SYSTEM_POLICY = GenericAccessRights.DELETE_CHILD
+    AUDIT_SET_USER_POLICY = GenericAccessRights.LIST_CHILDREN
+    AUDIT_QUERY_USER_POLICY = GenericAccessRights.SELF_WRITE
+    AUDIT_ENUMERATE_USERS = GenericAccessRights.READ_PROPERTY
+    AUDIT_SET_MISC_POLICY = GenericAccessRights.WRITE_PROPERTY
+    AUDIT_QUERY_MISC_POLICY = GenericAccessRights.DELETE_TREE
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -887,15 +893,15 @@ class AuditAccessRights(IntEnum):
 
 
 class LsaAccountAccessRights(IntEnum):
-    ACCOUNT_VIEW = GenericAccessRights.ACCESS0
-    ACCOUNT_ADJUST_PRIVILEGES = GenericAccessRights.ACCESS1
-    ACCOUNT_ADJUST_QUOTAS = GenericAccessRights.ACCESS2
-    ACCOUNT_ADJUST_SYSTEM_ACCESS = GenericAccessRights.ACCESS3
+    ACCOUNT_VIEW = GenericAccessRights.CREATE_CHILD
+    ACCOUNT_ADJUST_PRIVILEGES = GenericAccessRights.DELETE_CHILD
+    ACCOUNT_ADJUST_QUOTAS = GenericAccessRights.LIST_CHILDREN
+    ACCOUNT_ADJUST_SYSTEM_ACCESS = GenericAccessRights.SELF_WRITE
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -904,15 +910,15 @@ class LsaAccountAccessRights(IntEnum):
 
 
 class LsaPolicyAccessRights(IntEnum):
-    POLICY_VIEW_LOCAL_INFORMATION = GenericAccessRights.ACCESS0
-    POLICY_VIEW_AUDIT_INFORMATION = GenericAccessRights.ACCESS1
-    POLICY_GET_PRIVATE_INFORMATION = GenericAccessRights.ACCESS2
-    POLICY_TRUST_ADMIN = GenericAccessRights.ACCESS3
-    POLICY_CREATE_ACCOUNT = GenericAccessRights.ACCESS4
-    POLICY_CREATE_SECRET = GenericAccessRights.ACCESS5
-    POLICY_CREATE_PRIVILEGE = GenericAccessRights.ACCESS6
-    POLICY_SET_DEFAULT_QUOTA_LIMITS = GenericAccessRights.ACCESS7
-    POLICY_SET_AUDIT_REQUIREMENTS = GenericAccessRights.ACCESS8
+    POLICY_VIEW_LOCAL_INFORMATION = GenericAccessRights.CREATE_CHILD
+    POLICY_VIEW_AUDIT_INFORMATION = GenericAccessRights.DELETE_CHILD
+    POLICY_GET_PRIVATE_INFORMATION = GenericAccessRights.LIST_CHILDREN
+    POLICY_TRUST_ADMIN = GenericAccessRights.SELF_WRITE
+    POLICY_CREATE_ACCOUNT = GenericAccessRights.READ_PROPERTY
+    POLICY_CREATE_SECRET = GenericAccessRights.WRITE_PROPERTY
+    POLICY_CREATE_PRIVILEGE = GenericAccessRights.DELETE_TREE
+    POLICY_SET_DEFAULT_QUOTA_LIMITS = GenericAccessRights.LIST_OBJECT
+    POLICY_SET_AUDIT_REQUIREMENTS = GenericAccessRights.CONTROL_ACCESS
     POLICY_AUDIT_LOG_ADMIN = GenericAccessRights.ACCESS9
     POLICY_SERVER_ADMIN = GenericAccessRights.ACCESS10
     POLICY_LOOKUP_NAMES = GenericAccessRights.ACCESS11
@@ -921,7 +927,7 @@ class LsaPolicyAccessRights(IntEnum):
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -930,13 +936,13 @@ class LsaPolicyAccessRights(IntEnum):
 
 
 class LsaSecretAccessRights(IntEnum):
-    SECRET_SET_VALUE = GenericAccessRights.ACCESS0
-    SECRET_QUERY_VALUE = GenericAccessRights.ACCESS1
+    SECRET_SET_VALUE = GenericAccessRights.CREATE_CHILD
+    SECRET_QUERY_VALUE = GenericAccessRights.DELETE_CHILD
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -945,18 +951,18 @@ class LsaSecretAccessRights(IntEnum):
 
 
 class LsaTrustedDomainAccessRights(IntEnum):
-    TRUSTED_QUERY_DOMAIN_NAME = GenericAccessRights.ACCESS0
-    TRUSTED_QUERY_CONTROLLERS = GenericAccessRights.ACCESS1
-    TRUSTED_SET_CONTROLLERS = GenericAccessRights.ACCESS2
-    TRUSTED_QUERY_POSIX = GenericAccessRights.ACCESS3
-    TRUSTED_SET_POSIX = GenericAccessRights.ACCESS4
-    TRUSTED_SET_AUTH = GenericAccessRights.ACCESS5
-    TRUSTED_QUERY_AUTH = GenericAccessRights.ACCESS6
+    TRUSTED_QUERY_DOMAIN_NAME = GenericAccessRights.CREATE_CHILD
+    TRUSTED_QUERY_CONTROLLERS = GenericAccessRights.DELETE_CHILD
+    TRUSTED_SET_CONTROLLERS = GenericAccessRights.LIST_CHILDREN
+    TRUSTED_QUERY_POSIX = GenericAccessRights.SELF_WRITE
+    TRUSTED_SET_POSIX = GenericAccessRights.READ_PROPERTY
+    TRUSTED_SET_AUTH = GenericAccessRights.WRITE_PROPERTY
+    TRUSTED_QUERY_AUTH = GenericAccessRights.DELETE_TREE
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -965,16 +971,16 @@ class LsaTrustedDomainAccessRights(IntEnum):
 
 
 class SamAliasAccessRights(IntEnum):
-    ALIAS_ADD_MEMBER = GenericAccessRights.ACCESS0
-    ALIAS_REMOVE_MEMBER = GenericAccessRights.ACCESS1
-    ALIAS_LIST_MEMBERS = GenericAccessRights.ACCESS2
-    ALIAS_READ_INFORMATION = GenericAccessRights.ACCESS3
-    ALIAS_WRITE_ACCOUNT = GenericAccessRights.ACCESS4
+    ALIAS_ADD_MEMBER = GenericAccessRights.CREATE_CHILD
+    ALIAS_REMOVE_MEMBER = GenericAccessRights.DELETE_CHILD
+    ALIAS_LIST_MEMBERS = GenericAccessRights.LIST_CHILDREN
+    ALIAS_READ_INFORMATION = GenericAccessRights.SELF_WRITE
+    ALIAS_WRITE_ACCOUNT = GenericAccessRights.READ_PROPERTY
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -983,22 +989,22 @@ class SamAliasAccessRights(IntEnum):
 
 
 class SamDomainAccessRights(IntEnum):
-    DOMAIN_READ_PASSWORD_PARAMETERS = GenericAccessRights.ACCESS0
-    DOMAIN_WRITE_PASSWORD_PARAMS = GenericAccessRights.ACCESS1
-    DOMAIN_READ_OTHER_PARAMETERS = GenericAccessRights.ACCESS2
-    DOMAIN_WRITE_OTHER_PARAMETERS = GenericAccessRights.ACCESS3
-    DOMAIN_CREATE_USER = GenericAccessRights.ACCESS4
-    DOMAIN_CREATE_GROUP = GenericAccessRights.ACCESS5
-    DOMAIN_CREATE_ALIAS = GenericAccessRights.ACCESS6
-    DOMAIN_GET_ALIAS_MEMBERSHIP = GenericAccessRights.ACCESS7
-    DOMAIN_LIST_ACCOUNTS = GenericAccessRights.ACCESS8
+    DOMAIN_READ_PASSWORD_PARAMETERS = GenericAccessRights.CREATE_CHILD
+    DOMAIN_WRITE_PASSWORD_PARAMS = GenericAccessRights.DELETE_CHILD
+    DOMAIN_READ_OTHER_PARAMETERS = GenericAccessRights.LIST_CHILDREN
+    DOMAIN_WRITE_OTHER_PARAMETERS = GenericAccessRights.SELF_WRITE
+    DOMAIN_CREATE_USER = GenericAccessRights.READ_PROPERTY
+    DOMAIN_CREATE_GROUP = GenericAccessRights.WRITE_PROPERTY
+    DOMAIN_CREATE_ALIAS = GenericAccessRights.DELETE_TREE
+    DOMAIN_GET_ALIAS_MEMBERSHIP = GenericAccessRights.LIST_OBJECT
+    DOMAIN_LIST_ACCOUNTS = GenericAccessRights.CONTROL_ACCESS
     DOMAIN_LOOKUP = GenericAccessRights.ACCESS9
     DOMAIN_ADMINISTER_SERVER = GenericAccessRights.ACCESS10
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -1007,16 +1013,16 @@ class SamDomainAccessRights(IntEnum):
 
 
 class SamGroupAccessRights(IntEnum):
-    GROUP_READ_INFORMATION = GenericAccessRights.ACCESS0
-    GROUP_WRITE_ACCOUNT = GenericAccessRights.ACCESS1
-    GROUP_ADD_MEMBER = GenericAccessRights.ACCESS2
-    GROUP_REMOVE_MEMBER = GenericAccessRights.ACCESS3
-    GROUP_LIST_MEMBERS = GenericAccessRights.ACCESS4
+    GROUP_READ_INFORMATION = GenericAccessRights.CREATE_CHILD
+    GROUP_WRITE_ACCOUNT = GenericAccessRights.DELETE_CHILD
+    GROUP_ADD_MEMBER = GenericAccessRights.LIST_CHILDREN
+    GROUP_REMOVE_MEMBER = GenericAccessRights.SELF_WRITE
+    GROUP_LIST_MEMBERS = GenericAccessRights.READ_PROPERTY
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -1025,17 +1031,17 @@ class SamGroupAccessRights(IntEnum):
 
 
 class SamServerAccessRights(IntEnum):
-    SAM_SERVER_CONNECT = GenericAccessRights.ACCESS0
-    SAM_SERVER_SHUTDOWN = GenericAccessRights.ACCESS1
-    SAM_SERVER_INITIALIZE = GenericAccessRights.ACCESS2
-    SAM_SERVER_CREATE_DOMAIN = GenericAccessRights.ACCESS3
-    SAM_SERVER_ENUMERATE_DOMAINS = GenericAccessRights.ACCESS4
-    SAM_SERVER_LOOKUP_DOMAIN = GenericAccessRights.ACCESS5
+    SAM_SERVER_CONNECT = GenericAccessRights.CREATE_CHILD
+    SAM_SERVER_SHUTDOWN = GenericAccessRights.DELETE_CHILD
+    SAM_SERVER_INITIALIZE = GenericAccessRights.LIST_CHILDREN
+    SAM_SERVER_CREATE_DOMAIN = GenericAccessRights.SELF_WRITE
+    SAM_SERVER_ENUMERATE_DOMAINS = GenericAccessRights.READ_PROPERTY
+    SAM_SERVER_LOOKUP_DOMAIN = GenericAccessRights.WRITE_PROPERTY
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
@@ -1044,22 +1050,22 @@ class SamServerAccessRights(IntEnum):
 
 
 class SamUserAccessRights(IntEnum):
-    USER_READ_GENERAL = GenericAccessRights.ACCESS0
-    USER_READ_PREFERENCES = GenericAccessRights.ACCESS1
-    USER_WRITE_PREFERENCES = GenericAccessRights.ACCESS2
-    USER_READ_LOGON = GenericAccessRights.ACCESS3
-    USER_READ_ACCOUNT = GenericAccessRights.ACCESS4
-    USER_WRITE_ACCOUNT = GenericAccessRights.ACCESS5
-    USER_CHANGE_PASSWORD = GenericAccessRights.ACCESS6
-    USER_FORCE_PASSWORD_CHANGE = GenericAccessRights.ACCESS7
-    USER_LIST_GROUPS = GenericAccessRights.ACCESS8
+    USER_READ_GENERAL = GenericAccessRights.CREATE_CHILD
+    USER_READ_PREFERENCES = GenericAccessRights.DELETE_CHILD
+    USER_WRITE_PREFERENCES = GenericAccessRights.LIST_CHILDREN
+    USER_READ_LOGON = GenericAccessRights.SELF_WRITE
+    USER_READ_ACCOUNT = GenericAccessRights.READ_PROPERTY
+    USER_WRITE_ACCOUNT = GenericAccessRights.WRITE_PROPERTY
+    USER_CHANGE_PASSWORD = GenericAccessRights.DELETE_TREE
+    USER_FORCE_PASSWORD_CHANGE = GenericAccessRights.LIST_OBJECT
+    USER_LIST_GROUPS = GenericAccessRights.CONTROL_ACCESS
     USER_READ_GROUP_INFORMATION = GenericAccessRights.ACCESS9
     USER_WRITE_GROUP_INFORMATION = GenericAccessRights.ACCESS10
     GENERIC_READ = GenericAccessRights.GENERIC_READ
     GENERIC_WRITE = GenericAccessRights.GENERIC_WRITE
     GENERIC_EXECUTE = GenericAccessRights.GENERIC_EXECUTE
     GENERIC_ALL = GenericAccessRights.GENERIC_ALL
-    DELETE = GenericAccessRights.DELETE
+    DELETE = GenericAccessRights.STANDARD_DELETE
     READ_CONTROL = GenericAccessRights.READ_CONTROL
     WRITE_DAC = GenericAccessRights.WRITE_DAC
     WRITE_OWNER = GenericAccessRights.WRITE_OWNER
