@@ -11,24 +11,23 @@ Parse an SDDL string
 >> sddl = "O:SYG:SYD:AI(A;ID;GA;;;SY)"
 >> parse_sddl(sddl)
 SDDL(
-    owner=SIDEnum.LOCAL_SYSTEM,
-    group=SIDEnum.LOCAL_SYSTEM,
+    owner=<SIDEnum.LOCAL_SYSTEM: 'S-1-5-18'>,
+    group=<SIDEnum.LOCAL_SYSTEM: 'S-1-5-18'>,
     dacl=ACL(
-        flags={SDDLFlags.SDDL_AUTO_INHERITED},
+        flags={<SDDLFlags.SDDL_AUTO_INHERITED: 2>},
         aces=[
-            ACE(
-                type=AceType.ACCESS_ALLOWED,
-                flags={AceFlags.INHERITED},
-                object_guid="",
+            ACE(type=<AceType.ACCESS_ALLOWED: 0>,
+                flags={<AceFlags.INHERITED: 16>},
+                object_guid='',
                 rights_int=268435456,
-                inherit_object_guid="",
-                sid=SIDEnum.LOCAL_SYSTEM,
+                inherit_object_guid='',
+                sid=<SIDEnum.LOCAL_SYSTEM: 'S-1-5-18'>,
+                conditional_ace_string=None,
                 conditional_ace=None,
-                rights={GenericAccessRights.GENERIC_ALL},
+                rights={<GenericAccessRights.GENERIC_ALL: 268435456>}
             )
-        ],
-    ),
-    sacl=None,
+        ]),
+    sacl=None
 )
 ```
 
@@ -38,19 +37,19 @@ Parse an ACE
 >> from sddl_parser import parse_ace
 >> ace = "(A;ID;0x10030;;;AC)"
 >> parse_ace(ace)
-ACE(
-    type=AceType.ACCESS_ALLOWED,
-    flags={AceFlags.INHERITED},
-    object_guid="",
+ACE(type=<AceType.ACCESS_ALLOWED: 0>,
+    flags={<AceFlags.INHERITED: 16>},
+    object_guid='',
     rights_int=65584,
-    inherit_object_guid="",
-    sid=SIDEnum.ALL_APP_PACKAGES,
+    inherit_object_guid='',
+    sid=<SIDEnum.ALL_APP_PACKAGES: 'S-1-15-2-1'>,
+    conditional_ace_string=None,
     conditional_ace=None,
     rights={
-        GenericAccessRights.READ_PROPERTY,
-        GenericAccessRights.DELETE,
-        GenericAccessRights.WRITE_PROPERTY,
-    },
+        <GenericAccessRights.READ_PROPERTY: 16>,
+        <GenericAccessRights.WRITE_PROPERTY: 32>,
+        <GenericAccessRights.STANDARD_DELETE: 65536>
+    }
 )
 ```
 
@@ -61,24 +60,24 @@ See that `GenericAccessRights.ACCESS4` is returned. That's an indication that th
 >> ace = "(A;ID;0x1200a9;;;AC)"
 >> # alternatively, run parse_ace(ace, FileAccessRights)
 >> parse_ace(ace).as_type(FileAccessRights)
-ACE(
-    type=AceType.ACCESS_ALLOWED,
-    flags={AceFlags.INHERITED},
-    object_guid="",
+ACE(type=<AceType.ACCESS_ALLOWED: 0>,
+    flags={<AceFlags.INHERITED: 16>},
+    object_guid='',
     rights_int=1179817,
-    inherit_object_guid="",
-    sid=SIDEnum.ALL_APP_PACKAGES,
+    inherit_object_guid='',
+    sid=<SIDEnum.ALL_APP_PACKAGES: 'S-1-15-2-1'>,
+    conditional_ace_string=None,
     conditional_ace=None,
     rights={
-        FileAccessRights.FILE_EXECUTE,
-        FileAccessRights.FILE_READ_DATA,
-        FileAccessRights.FILE_READ_ATTRIBUTES,
-        FileAccessRights.READ_CONTROL,
-        FileAccessRights.SYNCHRONIZE,
-        FileAccessRights.FILE_GENERIC_EXECUTE,
-        FileAccessRights.FILE_READ_EA,
-        FileAccessRights.FILE_GENERIC_READ,
-    },
+        <FileAccessRights.FILE_READ_DATA: 1>,
+        <FileAccessRights.FILE_READ_EA: 8>,
+        <FileAccessRights.FILE_EXECUTE: 32>,
+        <FileAccessRights.FILE_READ_ATTRIBUTES: 128>,
+        <FileAccessRights.READ_CONTROL: 131072>,
+        <FileAccessRights.SYNCHRONIZE: 1048576>,
+        <FileAccessRights.FILE_GENERIC_READ: 1179785>,
+        <FileAccessRights.FILE_GENERIC_EXECUTE: 1179808>
+    }
 )
 ```
 
@@ -96,6 +95,75 @@ SDDL(
     group=SIDEnum.LOCAL_SYSTEM,
     dacl=ACL(flags={SDDLFlags.NO_ACCESS_CONTROL}, aces=[]),
     sacl=None,
+)
+```
+
+## Conditional ACE
+
+From MS docs:
+> A Conditional ACE allows a conditional expression to be evaluated when an access check
+
+The sddl_parser library will return the conditional ACE string as well as a custom intermediate language representation of the conditional ACE. It's not the prettiest IL. I'm open to suggestions.
+
+The ABNF definition for conditional ACEs is defined in [[MS-DYP] - 2.5.1.1](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f4296d69-1c0f-491f-9587-a960b292d070).
+
+```py
+>>> from pprint import pprint
+>>> test = '(XA;ID;0x1200a9;;;BU;(WIN://SYSAPPID Contains "MICROSOFT.MICROSOFTEDGE.STABLE_ABC123"))'
+>>> parse_ace(test)
+ACE(type=<AceType.ACCESS_ALLOWED_CALLBACK: 9>,
+    flags={<AceFlags.INHERITED: 16>},
+    object_guid='',
+    rights_int=1179817,
+    inherit_object_guid='',
+    sid=<SIDEnum.BUILTIN_USERS: 'S-1-5-32-545'>,
+    conditional_ace_string='(WIN://SYSAPPID Contains "MICROSOFT.MICROSOFTEDGE.STABLE_ABC123")',
+    conditional_ace=[
+        ('ATTRNAME', 'WIN://SYSAPPID'),
+        ('OPERATION', 'Contains'),
+        ('VALUE', 'MICROSOFT.MICROSOFTEDGE.STABLE_ABC123')
+    ],
+    rights={
+        <GenericAccessRights.CREATE_CHILD: 1>,
+        <GenericAccessRights.SELF_WRITE: 8>,
+        <GenericAccessRights.WRITE_PROPERTY: 32>,
+        <GenericAccessRights.LIST_OBJECT: 128>,
+        <GenericAccessRights.READ_CONTROL: 131072>,
+        <GenericAccessRights.SYNCHRONIZE: 1048576>
+    }
+)
+>>> test = '(XA;ID;0x1200a9;;;BU;(@User.Title=="PM" && (@User.Division=="Finance" || @User.Division == "Sales")))'
+>>> parse_ace(test)
+ACE(type=<AceType.ACCESS_ALLOWED_CALLBACK: 9>,
+    flags={<AceFlags.INHERITED: 16>},
+    object_guid='',
+    rights_int=1179817,
+    inherit_object_guid='',
+    sid=<SIDEnum.BUILTIN_USERS: 'S-1-5-32-545'>,
+    conditional_ace_string='(@User.Title=="PM" && (@User.Division=="Finance" || @User.Division == "Sales")',
+    conditional_ace={
+        'TYPE': 'AND',
+        'VALUES': [
+            [('ATTRNAME', '@user.Title'), ('OPERATION', '=='), ('VALUE', 'PM')],
+            {
+                'TYPE': 'GROUP', 'VALUE': {
+                    'TYPE': 'OR',
+                    'VALUES': [
+                        [('ATTRNAME', '@user.Division'), ('OPERATION', '=='), ('VALUE', 'Finance')],
+                        [('ATTRNAME', '@user.Division'), ('OPERATION', '=='), ('VALUE', 'Sales')]
+                    ]
+                }
+            }
+        ]
+    },
+    rights={
+        <GenericAccessRights.CREATE_CHILD: 1>,
+        <GenericAccessRights.SELF_WRITE: 8>,
+        <GenericAccessRights.WRITE_PROPERTY: 32>,
+        <GenericAccessRights.LIST_OBJECT: 128>,
+        <GenericAccessRights.READ_CONTROL: 131072>,
+        <GenericAccessRights.SYNCHRONIZE: 1048576>
+    }
 )
 ```
 
