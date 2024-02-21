@@ -1,4 +1,15 @@
-from parsy import string, regex, char_from, seq, test_char, Parser, generate
+from parsy import (
+    string,
+    peek,
+    regex,
+    char_from,
+    seq,
+    test_char,
+    Parser,
+    generate,
+    decimal_digit,
+)
+import parsy
 from functools import reduce
 from operator import or_
 from typing import List, Dict, Any, Callable
@@ -12,6 +23,8 @@ from sddl_parser.well_known_dictionary import (
 )
 from sddl_parser.types import ACE, SDDL, ACL
 from sddl_parser.enums import SDDLFlags
+from sddl_parser.parser_sid import parse_sid
+from sddl_parser.parser_conditional_ace import parse_conditional_ace_entry
 
 
 def parser_from_list(xs: List[str]) -> Parser:
@@ -45,10 +58,6 @@ def take_till_char(c: str) -> Parser:
 
 def take_till_paren() -> Parser:
     return take_till(lambda x: x == "(" or x == ")", "not ( or )")
-
-
-def parse_sid() -> Parser:
-    return regex(r"S-1(?:-\d+)*")
 
 
 def parse_sid_field() -> Parser:
@@ -107,47 +116,46 @@ inherit_object_guid = string("")
 
 
 def parse_conditional_ace() -> Parser:
-    """
-    Conditional ACEs are wrapped in a parenthetical. This parser will parse the
-    contents of the parenthetical. Inside the parenthesis, there can be multiple
-    parentheticals, so we need to parse until we reach the end of the
-    parenthetical, but not go over into the next ACE. This means we need to
-    match up every open paren with a close paren and only consume a single group
-
-    https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language-for-conditional-aces-
-    """
-    junk = take_till_paren()
-
     @generate
-    def group():
-        c1 = yield junk
-        c2 = yield string("(")
-        c3 = yield expr
-        c4 = yield string(")")
-        c5 = yield junk
-        return c1 + c2 + c3 + c4 + c5
+    def parse_cace():
+        yield string(";")
+        cas = yield peek(regex(r"\(.*?\)").map(str))
+        data = yield parse_conditional_ace_entry()
+        return cas, data
 
-    expr = group | junk | string("")
-    return string(";").then(expr)
+    return parse_cace
 
 
 def parse_ace_entry() -> Parser:
-    """
-    https://learn.microsoft.com/en-us/windows/win32/secauthz/ace-strings
-    Example: (A;;CCLCSWLOCRRC;;;SU)
-    """
-    return string("(") >> (
-        seq(
-            type=ace_types << char_from(";"),
-            flags=parse_ace_flags() << char_from(";"),
-            rights_int=parse_ace_rights() << char_from(";"),
-            object_guid=object_guid << char_from(";"),
-            inherit_object_guid=inherit_object_guid << char_from(";"),
-            sid=parse_sid_field(),
-            conditional_ace=parse_conditional_ace().optional(),
-        )
-        << string(")")
-    ).combine_dict(ACE)
+    # Use a generate function to construct the final ACE dictionary
+    @generate
+    def wrapped_parser():
+        yield string("(")
+        types = yield ace_types << char_from(";")
+        flags = yield parse_ace_flags() << char_from(";")
+        rights_int = yield parse_ace_rights() << char_from(";")
+        oguid = yield object_guid << char_from(";")
+        ioguid = yield inherit_object_guid << char_from(";")
+        sid = yield parse_sid_field()
+        conditional_ace = yield parse_conditional_ace().optional()
+
+        ca_str = conditional_ace[0] if conditional_ace else None
+        ca_o = conditional_ace[1] if conditional_ace else None
+
+        yield string(")")
+
+        return {
+            "type": types,
+            "flags": flags,
+            "rights_int": rights_int,
+            "object_guid": oguid,
+            "inherit_object_guid": ioguid,
+            "sid": sid,
+            "conditional_ace_string": ca_str,
+            "conditional_ace": ca_o,
+        }
+
+    return wrapped_parser.combine_dict(ACE)
 
 
 dacl = seq(
@@ -161,7 +169,6 @@ sacl = seq(
 
 # https://learn.microsoft.com/en-us/windows/win32/secauthz/sid-strings?source=recommendations
 # Example: O:SYG:SYD:(A;ID;FA;;;SY)
-# TODO: Allow entries to be out of order.
 # Something like sddl_item = parse_owner() | parse_group() | dacl | sacl
 # Then sddl_entry = sddl_item.many(), then just map each type to a single object
 # Not sure how you ensure only one of each type. Maybe just post-processing,

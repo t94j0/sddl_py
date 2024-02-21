@@ -108,7 +108,12 @@ def test_with_conditional_ace():
         object_guid="",
         inherit_object_guid="",
         sid=SIDEnum.BUILTIN_USERS,
-        conditional_ace='(WIN://SYSAPPID Contains "Microsoft.MicrosoftEdge.Stable_abcdefghijk")',
+        conditional_ace=[
+            ("ATTRNAME", "WIN://SYSAPPID"),
+            ("OPERATION", "Contains"),
+            ("VALUE", "Microsoft.MicrosoftEdge.Stable_abcdefghijk"),
+        ],
+        conditional_ace_string='(WIN://SYSAPPID Contains "Microsoft.MicrosoftEdge.Stable_abcdefghijk")',
     )
 
 

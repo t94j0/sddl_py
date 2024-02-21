@@ -27,7 +27,8 @@ class ACE:
     rights_int: int
     inherit_object_guid: str
     sid: SID
-    conditional_ace: Optional[str] = None
+    conditional_ace_string: Optional[str] = None
+    conditional_ace: Optional[object] = None
     rights: Set[AllRightsT] = field(default_factory=set)
 
     def as_type(self, access_mask: Type[AllRightsT]):
