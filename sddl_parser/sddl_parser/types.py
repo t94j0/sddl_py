@@ -39,7 +39,10 @@ class ACE:
         flags = "|".join([f.name for f in self.flags])
         rights = "|".join([r.name for r in self.rights])
         sid = self.sid.name if isinstance(self.sid, SIDEnum) else self.sid
-        return f"{' '*indent}{self.type.name} {flags} {rights} {sid}"
+        entry = f"{' '*indent}{self.type.name} {flags} {rights} {sid}"
+        if self.conditional_ace_string:
+            entry += f"\n{' '*indent}Condition: {self.conditional_ace_string}"
+        return entry
 
     def asdict(self) -> dict:
         return {
@@ -47,8 +50,12 @@ class ACE:
             "flags": [f.name for f in self.flags],
             "rights": [r.name for r in self.rights],
             "sid": self.sid.name if isinstance(self.sid, SIDEnum) else self.sid,
+            "conditional_ace": self.conditional_ace,
+            "conditional_ace_string": self.conditional_ace_string,
         }
 
+
+'O:SYG:SYD:AI(XA;ID;0x1200a9;;;BU;(WIN://SYSAPPID Contains "Microsoft.MicrosoftEdge.Stable_8wekyb3d8bbwe"))'
 
 @dataclass
 class ACL:

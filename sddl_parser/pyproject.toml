@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sddl-parser"
-version = "0.5.0"
+version = "0.6.0"
 description = "Parse SDDL strings"
 authors = ["Max Harley <maxh@maxh.io>"]
 readme = "README.md"
